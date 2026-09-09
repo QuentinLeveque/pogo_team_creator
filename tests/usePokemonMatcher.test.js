@@ -123,4 +123,60 @@ describe('usePokemonMatcher', () => {
     expect(charizardMatch.mine.ivAverage).toBe(100);
     expect(charizardMatch.mine.isLucky).toBe(true);
   });
+
+  it('prioritizes already evolved specimen and attaches better unevolved candidate if present', () => {
+    const masterList = [
+      // Déjà évolué mais rang moyen (88.5%)
+      {
+        Nom: 'Florizarre', Forme: '', 'Atq IV': '5', 'Déf IV': '10', 'Rés IV': '12',
+        'Rang % (G)': '88.5%', 'Rang # (G)': '450', 'Coût Poussières (G)': '10000', 'Coût Bonbon (G)': '25',
+        'Niveau Min': '20.0', 'Attaque Rapide': 'Fouet Lianes', 'Attaque Chargée': 'Végé-Attaque', 'Date Attrapée': '2025-01-01'
+      },
+      // Non-évolué mais avec un meilleur rang (99.5%)
+      {
+        Nom: 'Bulbizarre', Forme: '', 'Nom (G)': 'Florizarre', 'Forme (G)': 'Normale',
+        'Atq IV': '0', 'Déf IV': '14', 'Rés IV': '15',
+        'Rang % (G)': '99.5%', 'Rang # (G)': '12', 'Coût Poussières (G)': '125000', 'Coût Bonbon (G)': '124',
+        'Niveau Min': '10.0', 'Attaque Rapide': 'Charge', 'Attaque Chargée': 'Canon Graine', 'Date Attrapée': '2025-02-01'
+      }
+    ];
+
+    const rankings = [
+      {
+        speciesId: 'venusaur',
+        speciesName: 'Venusaur',
+        moveset: ['VINE_WHIP', 'FRENZY_PLANT', 'SLUDGE_BOMB']
+      }
+    ];
+
+    const eliteMovesMap = {
+      venusaur: ['FRENZY_PLANT']
+    };
+
+    const { matched } = matchPokemon(masterList, rankings, '1500', {}, eliteMovesMap);
+    const v = matched[0];
+
+    expect(v.mine).toBeDefined();
+    expect(v.mine.name).toBe('Florizarre');
+    expect(v.mine.isAlreadyEvolved).toBe(true);
+    expect(v.mine.needsEvolution).toBe(false);
+    expect(v.mine.betterUnevolvedCandidate).toBeDefined();
+    expect(v.mine.betterUnevolvedCandidate.name).toBe('Bulbizarre');
+    expect(v.mine.betterUnevolvedCandidate.ivRankPercent).toBe(99.5);
+
+    // Moves qualification
+    const moves = v.meta.recommendedMoveset;
+    expect(moves.fast.nameFr).toBe('Fouet Lianes');
+    expect(moves.fast.isKnown).toBe(true);
+    expect(moves.fast.isElite).toBe(false);
+
+    expect(moves.charged[0].nameFr).toBe('Végé-Attaque');
+    expect(moves.charged[0].isElite).toBe(true);
+    expect(moves.charged[0].isKnown).toBe(true); // known on active Florizarre
+
+    expect(moves.charged[1].nameFr).toBe('Bombe Beurk');
+    expect(moves.charged[1].isElite).toBe(false);
+    expect(moves.charged[1].isKnown).toBe(false); // not learned
+  });
 });
+
