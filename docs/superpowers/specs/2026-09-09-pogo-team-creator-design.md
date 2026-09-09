@@ -67,6 +67,7 @@ pogo_team_creator/
 │   │   ├── PokemonList.vue      # Scrollable list of PokemonRow components
 │   │   ├── PokemonRow.vue       # Single row: collapsed and expanded states
 │   │   ├── CsvImporter.vue      # Modal: file picker + drag-and-drop
+│   │   ├── FormMappingEditor.vue # Panel: map unrecognized French forms to PvPoke suffixes
 │   │   └── ConfirmDialog.vue    # Reusable confirmation modal
 │   ├── assets/
 │   │   └── type-colors.js       # Pokémon type → color mapping
@@ -231,7 +232,7 @@ Obscur/Purifié = 0              → lowercase + replace spaces/dashes → "char
 // fr.json[5] = "dracaufeu"   →  en.json[5] = "Charizard"
 ```
 
-**`forms.json`**: French form name → English suffix:
+**`forms.json`**: French form name → English suffix (manually maintained, stored in `userData`):
 ```json
 {
   "Galar": "galarian",
@@ -246,6 +247,39 @@ Obscur/Purifié = 0              → lowercase + replace spaces/dashes → "char
 
 A `null` or missing form means no suffix is appended.
 
+> [!IMPORTANT]
+> `forms.json` is manually maintained — it may be incomplete when new Pokémon forms are released. The app handles this gracefully with unmatched form detection (see below).
+
+### Unmatched Form Detection & Mapping Editor
+
+Since `forms.json` is manually curated from the user's own collection, it may not cover every possible form. The app handles this:
+
+**Detection**: During the matching algorithm, if a French form name from the CSV is not found in `forms.json` (and is not empty/null), it is flagged as "unmatched."
+
+**UI Warning**: A warning badge appears in the sidebar: *"⚠ 3 formes non reconnues"*. Clicking it opens a **form mapping editor panel**:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Formes non reconnues                               │
+│                                                     │
+│  Les formes suivantes n'ont pas de correspondance   │
+│  avec PvPoke. Entrez le suffixe anglais utilisé     │
+│  par PvPoke (ex: "galarian", "origin", "mega").     │
+│                                                     │
+│  "Céleste"      →  [sky___________]                 │
+│  "Terrestre"    →  [land__________]                 │
+│  "Inconnue"     →  [______________]                 │
+│                                                     │
+│  [Sauvegarder]                                      │
+└─────────────────────────────────────────────────────┘
+```
+
+- User types the English suffix (can check PvPoke's rankings to find it)
+- On save, the mapping is added to `forms.json` in `userData` and the Pokémon list is re-matched immediately
+- Unmatched Pokémon are still shown in the list with a subtle ⚠ icon, so the user knows some data is missing
+
+**Storage**: `forms.json` is stored in `userData/` (not bundled in the app), so user-added mappings persist across app updates. The app ships with the initial set from the `old/form..json` file.
+
 ### speciesId Construction
 
 ```javascript
@@ -255,13 +289,16 @@ function toSpeciesId(frenchName, form, isShadow) {
 
   if (form && forms[form]) {
     id += `_${forms[form]}`;
+  } else if (form && form !== "Normale" && !forms.hasOwnProperty(form)) {
+    // Flag as unmatched form — cannot generate correct speciesId
+    return { id, unmatched: true, unmatchedForm: form };
   }
 
   if (isShadow) {
     id += '_shadow';
   }
 
-  return id;
+  return { id, unmatched: false };
 }
 ```
 
