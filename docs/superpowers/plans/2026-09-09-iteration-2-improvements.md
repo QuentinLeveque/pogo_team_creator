@@ -39,7 +39,7 @@
   - IPC handler: `pvpoke:refresh` et `pvpoke:get-elite-moves`
   - Méthodes preload: `window.electronAPI.refreshPvpoke()` et `window.electronAPI.getEliteMoves()`
 
-- [ ] **Step 1: Écrire le test unitaire pour l'extraction des eliteMoves et le rafraîchissement manuel**
+- [x] **Step 1: Écrire le test unitaire pour l'extraction des eliteMoves et le rafraîchissement manuel**
 
 Dans `tests/pvpokeCache.test.js`, ajouter les tests vérifiant l'extraction des `eliteMoves` depuis le gamemaster et la fonction `refreshAll` :
 
@@ -62,12 +62,12 @@ it('extracts eliteMoves map from gamemaster correctly', async () => {
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/pvpokeCache.test.js`  
 Résultat attendu : FAIL car `getEliteMovesMap` n'est pas encore implémenté.
 
-- [ ] **Step 3: Implémenter `getEliteMovesMap` et `refreshAll` dans `electron/services/pvpokeCache.js`**
+- [x] **Step 3: Implémenter `getEliteMovesMap` et `refreshAll` dans `electron/services/pvpokeCache.js`**
 
 Ajouter la gestion du cache gamemaster, l'extraction de `eliteMoves` et la fonction `refreshAll` dans `electron/services/pvpokeCache.js` :
 
@@ -109,12 +109,12 @@ async function refreshAll(leagues = ['1500', '2500', '10000', '500']) {
 
 Exposer ces méthodes dans `module.exports`, brancher l'IPC dans `electron/main.js` et les ponts dans `electron/preload.js`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/pvpokeCache.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add electron/services/pvpokeCache.js electron/main.js electron/preload.js tests/pvpokeCache.test.js
@@ -134,7 +134,7 @@ git commit -m "feat(pvpoke): add elite moves extraction and manual cache refresh
 - Produces: 
   - `calculateResourceCosts(initialLevel, dustCost, candyCost, isShadow, isLucky)` : retourne `{ dustCost, candyCost, xlCandyCost, requiresXl }`
 
-- [ ] **Step 1: Écrire le test unitaire pour `costCalculator.js`**
+- [x] **Step 1: Écrire le test unitaire pour `costCalculator.js`**
 
 Créer `tests/costCalculator.test.js` :
 
@@ -163,12 +163,12 @@ describe('calculateResourceCosts', () => {
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/costCalculator.test.js`  
 Résultat attendu : FAIL car `costCalculator.js` n'existe pas encore.
 
-- [ ] **Step 3: Implémenter `src/utils/costCalculator.js`**
+- [x] **Step 3: Implémenter `src/utils/costCalculator.js`**
 
 Créer `src/utils/costCalculator.js` avec la table officielle des paliers de poussières et bonbons XL de Pokémon GO :
 
@@ -258,12 +258,12 @@ export function calculateResourceCosts(initialLevel, rawDustCost, rawCandyCost, 
 }
 ```
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/costCalculator.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/utils/costCalculator.js tests/costCalculator.test.js
@@ -290,7 +290,7 @@ git commit -m "feat(resources): add costCalculator for XL candy and stardust req
       - `fast`: `{ moveId, nameFr, isElite, isKnown }`
       - `charged`: `Array<{ moveId, nameFr, isElite, isKnown }>`
 
-- [ ] **Step 1: Écrire les tests unitaires pour la déduplication évolué vs non-évolué et la qualification des attaques**
+- [x] **Step 1: Écrire les tests unitaires pour la déduplication évolué vs non-évolué et la qualification des attaques**
 
 Dans `tests/usePokemonMatcher.test.js`, ajouter :
 
@@ -351,12 +351,12 @@ it('prioritizes already evolved specimen and attaches better unevolved candidate
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : FAIL en raison de l'absence des nouveaux champs et de la logique de séparation évolué / non-évolué.
 
-- [ ] **Step 3: Implémenter la logique dans `src/composables/usePokemonMatcher.js`**
+- [x] **Step 3: Implémenter la logique dans `src/composables/usePokemonMatcher.js`**
 
 Mettre à jour `matchPokemon` dans `src/composables/usePokemonMatcher.js` :
 - Intégrer `calculateResourceCosts` de `src/utils/costCalculator.js`.
@@ -366,12 +366,12 @@ Mettre à jour `matchPokemon` dans `src/composables/usePokemonMatcher.js` :
 - Si aucun `evolved` n'existe, sélectionner le meilleur `unevolved` avec `needsEvolution = true`.
 - Qualifier chaque attaque recommandée avec `isElite = (eliteMovesMap[speciesId] || []).includes(moveId)` et `isKnown = specimenMoves.includes(moveNameFr.toLowerCase())`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/composables/usePokemonMatcher.js tests/usePokemonMatcher.test.js
@@ -393,7 +393,7 @@ git commit -m "feat(matcher): prioritize evolved specimen and qualify moves with
   - Événement `@update:exclude-xl` ou synchronisation avec le store
   - Filtrage dans `PokemonList.vue` : exclut les Pokémon avec `mine?.requiresXl === true`
 
-- [ ] **Step 1: Écrire le test unitaire pour le toggle XL dans `SearchBar.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour le toggle XL dans `SearchBar.test.js`**
 
 Dans `tests/components/SearchBar.test.js`, ajouter :
 
@@ -416,12 +416,12 @@ it('emits update:excludeXl when clicking the Sans bonbons XL button', async () =
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/SearchBar.test.js`  
 Résultat attendu : FAIL car `.xl-toggle-btn` n'existe pas encore.
 
-- [ ] **Step 3: Implémenter le bouton toggle dans `SearchBar.vue` et le filtre dans `PokemonList.vue`**
+- [x] **Step 3: Implémenter le bouton toggle dans `SearchBar.vue` et le filtre dans `PokemonList.vue`**
 
 1. Dans `src/components/SearchBar.vue` :
    - Ajouter la prop `excludeXl` (booléen) et l'émission `update:excludeXl`.
@@ -431,12 +431,12 @@ Résultat attendu : FAIL car `.xl-toggle-btn` n'existe pas encore.
    - Lier `v-model:excludeXl="excludeXl"`.
    - Dans le computed `filteredPokemon`, ajouter la condition : `if (excludeXl.value && item.mine && item.mine.requiresXl) return false;`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/SearchBar.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/SearchBar.vue src/components/PokemonList.vue tests/components/SearchBar.test.js
@@ -459,7 +459,7 @@ git commit -m "feat(filter): add exclude XL candy toggle in search bar"
   - Affichage `{{ item.pokemonCountInFile }} au total · +{{ item.newPokemonAdded }} ajoutés`
   - Bouton rafraîchir avec spinner et date de mise à jour
 
-- [ ] **Step 1: Écrire le test unitaire pour `AppSidebar.vue`**
+- [x] **Step 1: Écrire le test unitaire pour `AppSidebar.vue`**
 
 Dans `tests/components/AppSidebar.test.js`, ajouter :
 
@@ -484,12 +484,12 @@ it('displays formatted CSV history with total and added counts', () => {
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/AppSidebar.test.js`  
 Résultat attendu : FAIL car l'affichage utilise encore l'ancien format `+1176 Pokémon`.
 
-- [ ] **Step 3: Mettre à jour `AppSidebar.vue` et `pokemonStore.js`**
+- [x] **Step 3: Mettre à jour `AppSidebar.vue` et `pokemonStore.js`**
 
 1. Dans `src/components/AppSidebar.vue` :
    - Mettre à jour le format du badge historique :
@@ -503,12 +503,12 @@ Résultat attendu : FAIL car l'affichage utilise encore l'ancien format `+1176 P
 2. Dans `src/stores/pokemonStore.js` :
    - Ajouter la méthode `async refreshPvpoke()` qui appelle `window.electronAPI.refreshPvpoke()`, recharge le Gamemaster / Elite moves, et réexécute le matching.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/AppSidebar.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/AppSidebar.vue src/stores/pokemonStore.js src/stores/appStore.js tests/components/AppSidebar.test.js
@@ -532,7 +532,7 @@ git commit -m "feat(sidebar): enhance CSV history counter and add manual pvpoke 
   - Pastilles de ressources sur la carte réduite
   - Bloc comparatif côte-à-côte en vue dépliée
 
-- [ ] **Step 1: Créer le composant `PokemonSprite.vue` et son test unitaire**
+- [x] **Step 1: Créer le composant `PokemonSprite.vue` et son test unitaire**
 
 Créer `src/components/PokemonSprite.vue` pour charger le sprite pixel statique Showdown / PokeAPI avec fallback propre :
 
@@ -600,7 +600,7 @@ function handleError() {
 </style>
 ```
 
-- [ ] **Step 2: Écrire les tests unitaires pour `PokemonRow.vue`**
+- [x] **Step 2: Écrire les tests unitaires pour `PokemonRow.vue`**
 
 Dans `tests/components/PokemonRow.test.js`, ajouter les assertions pour :
 - La présence du sprite pixel.
@@ -611,7 +611,7 @@ Dans `tests/components/PokemonRow.test.js`, ajouter les assertions pour :
 - L'avis `Meilleur non-évolué disponible` et le bloc de comparaison déplié.
 - Les badges d'attaques avec icône Élite et statut `Connue` / `CT requise`.
 
-- [ ] **Step 3: Mettre à jour `PokemonRow.vue`**
+- [x] **Step 3: Mettre à jour `PokemonRow.vue`**
 
 Mettre à jour `src/components/PokemonRow.vue` avec :
 - Intégration de `PokemonSprite.vue`.
@@ -626,12 +626,12 @@ Mettre à jour `src/components/PokemonRow.vue` avec :
 - Badges d'attaques stylisés avec statut `isElite` (étoile) et `isKnown` (coche verte).
 - En vue dépliée : bloc comparatif côte-à-côte si `betterUnevolvedCandidate` est présent.
 
-- [ ] **Step 4: Exécuter les tests de composants**
+- [x] **Step 4: Exécuter les tests de composants**
 
 Exécuter : `npx vitest run tests/components/PokemonRow.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/PokemonSprite.vue src/components/PokemonRow.vue tests/components/PokemonRow.test.js
@@ -647,21 +647,21 @@ git commit -m "feat(ui): add pixel sprite, form/evolution badges, resource costs
 - Test: ensemble des suites de test (`npm test`)
 - Build: validation du bundle Vite (`npm run build`)
 
-- [ ] **Step 1: Mettre à jour le test d'intégration pour valider le flux complet**
+- [x] **Step 1: Mettre à jour le test d'intégration pour valider le flux complet**
 
 Dans `tests/integration.test.js`, vérifier que le chargement complet des données réelles avec `old/poke_genie_export_2.csv` produit les nouveaux attributs (coûts XL, attaques qualifiées, déduplication évolué vs non-évolué).
 
-- [ ] **Step 2: Exécuter l'ensemble de la suite de tests**
+- [x] **Step 2: Exécuter l'ensemble de la suite de tests**
 
 Exécuter : `npm test`  
 Résultat attendu : Tous les tests passent à 100%.
 
-- [ ] **Step 3: Tester le build de production**
+- [x] **Step 3: Tester le build de production**
 
 Exécuter : `npm run build`  
 Résultat attendu : Build réussi sans erreurs de syntaxe, d'import ou de bundling.
 
-- [ ] **Step 4: Commiter et finaliser**
+- [x] **Step 4: Commiter et finaliser**
 
 ```bash
 git add tests/integration.test.js
