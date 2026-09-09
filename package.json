@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\""
+    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron . --no-sandbox\""
   },
   "dependencies": {
     "pinia": "^2.1.7",

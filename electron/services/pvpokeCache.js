@@ -13,7 +13,12 @@ const PVP_URLS = {
 };
 
 // Common move translations French
-const { translateMove, MOVE_TRANSLATIONS } = require('../../src/data/moves.js');
+const MOVE_TRANSLATIONS = require('../../src/data/moves.json');
+
+function translateMove(moveId) {
+  if (!moveId) return '';
+  return MOVE_TRANSLATIONS[moveId] || moveId;
+}
 
 function initPvpokeCache(userDataDir) {
   cacheDir = path.join(userDataDir, 'cache');
