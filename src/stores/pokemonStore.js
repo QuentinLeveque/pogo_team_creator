@@ -16,7 +16,8 @@ export const usePokemonStore = defineStore('pokemon', {
     error: null,
     searchQuery: '',
     sortOption: 'score',
-    activeView: 'my-pokemon'
+    activeView: 'my-pokemon',
+    excludeXl: false
   }),
   getters: {
     displayedPokemon(state) {
@@ -24,6 +25,10 @@ export const usePokemonStore = defineStore('pokemon', {
 
       if (state.activeView === 'my-pokemon') {
         list = list.filter(item => item.mine !== null);
+      }
+
+      if (state.excludeXl) {
+        list = list.filter(item => !item.mine || !item.mine.requiresXl);
       }
 
       if (state.searchQuery.trim() !== '') {

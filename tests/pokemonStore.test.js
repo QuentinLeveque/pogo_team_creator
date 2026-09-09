@@ -59,4 +59,21 @@ describe('pokemonStore', () => {
     store.sortOption = 'cost';
     expect(store.displayedPokemon[0].meta.nameFr).toBe('A');
   });
+
+  it('filters out pokemon requiring XL candy when excludeXl is true', () => {
+    const store = usePokemonStore();
+    store.rawMatched = [
+      { meta: { nameFr: 'Azumarill', score: 90 }, mine: { name: 'Azumarill', requiresXl: true } },
+      { meta: { nameFr: 'Laggron', score: 88 }, mine: { name: 'Laggron', requiresXl: false } }
+    ];
+    store.activeView = 'my-pokemon';
+
+    store.excludeXl = false;
+    expect(store.displayedPokemon.length).toBe(2);
+
+    store.excludeXl = true;
+    expect(store.displayedPokemon.length).toBe(1);
+    expect(store.displayedPokemon[0].meta.nameFr).toBe('Laggron');
+  });
 });
+

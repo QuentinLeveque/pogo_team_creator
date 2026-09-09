@@ -26,4 +26,22 @@ describe('SearchBar.vue', () => {
     await select.setValue('ivRank');
     expect(store.sortOption).toBe('ivRank');
   });
+
+  it('toggles pokemonStore.excludeXl when clicking the Sans bonbons XL button', async () => {
+    const wrapper = mount(SearchBar);
+    const store = usePokemonStore();
+    expect(store.excludeXl).toBe(false);
+
+    const xlBtn = wrapper.find('.xl-toggle-btn');
+    expect(xlBtn.exists()).toBe(true);
+    expect(xlBtn.classes()).not.toContain('active');
+
+    await xlBtn.trigger('click');
+    expect(store.excludeXl).toBe(true);
+    expect(xlBtn.classes()).toContain('active');
+
+    await xlBtn.trigger('click');
+    expect(store.excludeXl).toBe(false);
+  });
 });
+

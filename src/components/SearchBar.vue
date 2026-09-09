@@ -11,6 +11,16 @@
         ✕
       </button>
     </div>
+    <div class="filters-wrapper">
+      <button
+        type="button"
+        class="xl-toggle-btn"
+        :class="{ active: pokemonStore.excludeXl }"
+        @click="pokemonStore.excludeXl = !pokemonStore.excludeXl"
+      >
+        <span class="xl-icon">🔷</span> Sans bonbons XL
+      </button>
+    </div>
     <div class="sort-wrapper">
       <label class="sort-label">Trier par :</label>
       <select v-model="pokemonStore.sortOption" class="sort-select">
@@ -35,6 +45,7 @@ const pokemonStore = usePokemonStore();
   gap: 1rem;
   align-items: center;
   margin: 1rem 0;
+  flex-wrap: wrap;
 }
 .search-input-wrapper {
   flex: 1;
@@ -62,6 +73,38 @@ const pokemonStore = usePokemonStore();
   border: none;
   cursor: pointer;
   color: #A0AEC0;
+}
+.filters-wrapper {
+  display: flex;
+  align-items: center;
+}
+.xl-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #4A5568;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.xl-toggle-btn:hover {
+  border-color: #CBD5E0;
+  background: #F7FAFC;
+}
+.xl-toggle-btn.active {
+  background: #EBF8FF;
+  border-color: #3182CE;
+  color: #2B6CB0;
+  font-weight: 600;
+}
+.xl-icon {
+  font-size: 0.85rem;
 }
 .sort-wrapper {
   display: flex;
