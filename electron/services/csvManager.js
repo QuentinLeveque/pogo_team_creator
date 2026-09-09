@@ -94,7 +94,9 @@ function getUniqueKey(pokemon) {
   const atq = pokemon['Atq IV'] || '';
   const def = pokemon['Déf IV'] || '';
   const sta = pokemon['Rés IV'] || '';
-  const date = pokemon['Date Attrapée'] || '';
+  const date = (pokemon['Date Attrapée'] && pokemon['Date Attrapée'].trim() !== '')
+    ? pokemon['Date Attrapée']
+    : (pokemon['Date Analyse'] || '');
   return `${nom}_${forme}_${atq}_${def}_${sta}_${date}`;
 }
 
