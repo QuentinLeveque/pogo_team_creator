@@ -85,6 +85,7 @@ async function exportMerged() {
   });
 
   if (!saveRes.canceled && saveRes.filePath) {
+    await window.electronAPI.writeFile(saveRes.filePath, csvData);
     appStore.showToast('CSV exporté avec succès.');
   }
 }

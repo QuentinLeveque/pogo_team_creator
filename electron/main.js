@@ -55,6 +55,11 @@ ipcMain.handle('dialog:save', async (e, options) => {
   return await dialog.showSaveDialog(options);
 });
 
+ipcMain.handle('fs:writeFile', async (e, filePath, content) => {
+  fs.writeFileSync(filePath, content, 'utf-8');
+  return true;
+});
+
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {

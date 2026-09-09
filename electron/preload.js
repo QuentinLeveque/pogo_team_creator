@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getForms: () => ipcRenderer.invoke('forms:get'),
   saveForms: (mapping) => ipcRenderer.invoke('forms:save', mapping),
 
-  // Native Dialogs
-  showSaveDialog: (options) => ipcRenderer.invoke('dialog:save', options)
+  // Native Dialogs & File Writing
+  showSaveDialog: (options) => ipcRenderer.invoke('dialog:save', options),
+  writeFile: (filePath, content) => ipcRenderer.invoke('fs:writeFile', filePath, content)
 });
