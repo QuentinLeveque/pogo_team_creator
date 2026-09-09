@@ -13,46 +13,7 @@ const PVP_URLS = {
 };
 
 // Common move translations French
-const MOVE_TRANSLATIONS = {
-  FAIRY_WIND: 'Vent Féerique',
-  WING_ATTACK: 'Cru-Ailes',
-  DRAGON_BREATH: 'Draco-Souffle',
-  COUNTER: 'Riposte',
-  SHADOW_CLAW: 'Griffe Ombre',
-  MUD_SHOT: 'Tir de Boue',
-  WATER_GUN: 'Pistolet à O',
-  BULLET_SEED: 'Balle Graine',
-  POISON_JAB: 'Direct Toxik',
-  SNARL: 'Aboiement',
-  INCINERATE: 'Calcination',
-  VOLT_SWITCH: 'Change Éclair',
-  GIGATON_HAMMER: 'Marteau Prodigieux',
-  BULLDOZE: 'Piétinement',
-  HYDRO_CANNON: 'Hydroblast',
-  FRENZY_PLANT: 'Végé-Attak',
-  BLAST_BURN: 'Rafale Feu',
-  DRAGON_CLAW: 'Draco-Griffe',
-  BODY_SLAM: 'Plaquage',
-  SURF: 'Surf',
-  ICE_BEAM: 'Laser Glace',
-  THUNDERBOLT: 'Tonnerre',
-  FLAMETHROWER: 'Lance-Flammes',
-  SHADOW_BALL: 'Ball\'Ombre',
-  SLUDGE_BOMB: 'Bomb-Beurk',
-  EARTHQUAKE: 'Séisme',
-  CLOSE_COMBAT: 'Close Combat',
-  CRUNCH: 'Mâchouille',
-  FOUL_PLAY: 'Tricherie',
-  BRAVE_BIRD: 'Rapace',
-  SKY_ATTACK: 'Piqué',
-  ROCK_SLIDE: 'Éboulement',
-  STONE_EDGE: 'Lame de Roc',
-  AQUA_TAIL: 'Aqua-Queue',
-  WEATHER_BALL_WATER: 'Ball\'Météo (Eau)',
-  WEATHER_BALL_FIRE: 'Ball\'Météo (Feu)',
-  WEATHER_BALL_ICE: 'Ball\'Météo (Glace)',
-  WEATHER_BALL_ROCK: 'Ball\'Météo (Roche)'
-};
+const { translateMove, MOVE_TRANSLATIONS } = require('../../src/data/moves.js');
 
 function initPvpokeCache(userDataDir) {
   cacheDir = path.join(userDataDir, 'cache');
@@ -84,10 +45,6 @@ function setCacheMeta(key, timestamp) {
   }
 }
 
-function translateMove(moveId) {
-  if (!moveId) return '';
-  return MOVE_TRANSLATIONS[moveId] || moveId;
-}
 
 async function fetchFromNetwork(url) {
   const res = await fetch(url);

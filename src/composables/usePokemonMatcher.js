@@ -1,5 +1,5 @@
-const { toSpeciesId, speciesIdToFrench } = require('../../electron/services/nameTranslator.js');
-const { translateMove } = require('../../electron/services/pvpokeCache.js');
+import { toSpeciesId, speciesIdToFrench } from '../../electron/services/nameTranslator.js';
+import { translateMove } from '../data/moves.js';
 
 function parsePercent(val) {
   if (!val) return 0;
@@ -11,7 +11,7 @@ function parseNumber(val) {
   return parseFloat(String(val).replace(',', '.')) || 0;
 }
 
-function matchPokemon(masterList, rankings, league, customForms = {}) {
+export function matchPokemon(masterList, rankings, league, customForms = {}) {
   const unmatchedFormsSet = new Set();
   const ownedCandidatesBySpecies = new Map();
 
@@ -140,7 +140,3 @@ function matchPokemon(masterList, rankings, league, customForms = {}) {
     unmatchedForms: Array.from(unmatchedFormsSet)
   };
 }
-
-module.exports = {
-  matchPokemon
-};

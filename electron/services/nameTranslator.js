@@ -1,20 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-
-const frPath = path.resolve(__dirname, '../../src/data/fr.json');
-const enPath = path.resolve(__dirname, '../../src/data/en.json');
-const formsPath = path.resolve(__dirname, '../../src/data/forms.json');
-
-const frNames = JSON.parse(fs.readFileSync(frPath, 'utf-8'));
-const enNames = JSON.parse(fs.readFileSync(enPath, 'utf-8'));
-const defaultForms = JSON.parse(fs.readFileSync(formsPath, 'utf-8'));
+import frNames from '../../src/data/fr.json';
+import enNames from '../../src/data/en.json';
+import defaultForms from '../../src/data/forms.json';
 
 function normalizeName(str) {
   if (!str) return '';
   return str.trim().toLowerCase();
 }
 
-function toSpeciesId(frenchName, form, isShadow = false, customForms = {}) {
+export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}) {
   if (!frenchName) {
     return { id: '', unmatched: false, unmatchedForm: null };
   }
@@ -54,7 +47,7 @@ function toSpeciesId(frenchName, form, isShadow = false, customForms = {}) {
   return { id, unmatched, unmatchedForm };
 }
 
-function speciesIdToFrench(speciesId, customForms = {}) {
+export function speciesIdToFrench(speciesId, customForms = {}) {
   if (!speciesId) return { frenchName: '', form: '', isShadow: false };
 
   let cleanId = speciesId;
@@ -90,8 +83,3 @@ function speciesIdToFrench(speciesId, customForms = {}) {
 
   return { frenchName, form: formName, isShadow };
 }
-
-module.exports = {
-  toSpeciesId,
-  speciesIdToFrench
-};
