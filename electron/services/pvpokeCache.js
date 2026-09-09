@@ -125,10 +125,47 @@ async function getGameMaster(forceRefresh = false) {
   }
 }
 
+let eliteMovesCache = null;
+
+async function getEliteMovesMap(forceRefresh = false) {
+  if (eliteMovesCache && !forceRefresh) {
+    return eliteMovesCache;
+  }
+  const gm = await getGameMaster(forceRefresh);
+  const map = {};
+  if (gm && Array.isArray(gm.pokemon)) {
+    for (const p of gm.pokemon) {
+      if (p.speciesId) {
+        map[p.speciesId] = Array.isArray(p.eliteMoves) ? p.eliteMoves : [];
+      }
+    }
+  }
+  eliteMovesCache = map;
+  return map;
+}
+
+async function refreshAll(leagues = ['1500', '2500', '10000', '500']) {
+  const updatedLeagues = [];
+  for (const league of leagues) {
+    await getRankings(league, true);
+    updatedLeagues.push(league);
+  }
+  await getGameMaster(true);
+  await getEliteMovesMap(true);
+  return {
+    success: true,
+    updatedLeagues,
+    timestamp: new Date().toISOString()
+  };
+}
+
 module.exports = {
   initPvpokeCache,
   getRankings,
   getGameMaster,
+  getEliteMovesMap,
+  refreshAll,
   translateMove,
   MOVE_TRANSLATIONS
 };
+

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const { initCsvManager, getMasterPokemon, importAndMerge, removePokemon, exportMergedCsv, getImportHistory } = require('./services/csvManager');
-const { initPvpokeCache, getRankings } = require('./services/pvpokeCache');
+const { initPvpokeCache, getRankings, getEliteMovesMap, refreshAll } = require('./services/pvpokeCache');
 const { initSettingsManager, getSettings, saveSettings, getForms, saveForms } = require('./services/settingsManager');
 
 function createWindow() {
@@ -45,6 +45,8 @@ ipcMain.handle('csv:export', () => exportMergedCsv());
 ipcMain.handle('csv:getHistory', () => getImportHistory());
 
 ipcMain.handle('pvpoke:getRankings', (e, league, forceRefresh) => getRankings(league, forceRefresh));
+ipcMain.handle('pvpoke:getEliteMoves', () => getEliteMovesMap());
+ipcMain.handle('pvpoke:refresh', (e, leagues) => refreshAll(leagues));
 
 ipcMain.handle('settings:get', () => getSettings());
 ipcMain.handle('settings:save', (e, patch) => saveSettings(patch));

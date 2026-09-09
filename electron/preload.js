@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // PvPoke
   getRankings: (league, forceRefresh) => ipcRenderer.invoke('pvpoke:getRankings', league, forceRefresh),
+  getEliteMoves: () => ipcRenderer.invoke('pvpoke:getEliteMoves'),
+  refreshPvpoke: (leagues) => ipcRenderer.invoke('pvpoke:refresh', leagues),
 
   // Settings & Forms
   getSettings: () => ipcRenderer.invoke('settings:get'),

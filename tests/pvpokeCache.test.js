@@ -5,6 +5,8 @@ import os from 'os';
 import {
   initPvpokeCache,
   getRankings,
+  getEliteMovesMap,
+  refreshAll,
   translateMove
 } from '../electron/services/pvpokeCache.js';
 
@@ -43,4 +45,25 @@ describe('pvpokeCache', () => {
     expect(result.data.length).toBe(1);
     expect(result.data[0].speciesId).toBe('tinkaton');
   });
+
+  it('extracts eliteMoves map from gamemaster correctly', async () => {
+    const fakeGameMaster = {
+      pokemon: [
+        { speciesId: 'charizard', eliteMoves: ['BLAST_BURN', 'DRAGON_BREATH', 'EMBER', 'WING_ATTACK'] },
+        { speciesId: 'venusaur', eliteMoves: ['FRENZY_PLANT'] },
+        { speciesId: 'pikachu' }
+      ]
+    };
+    const gmFile = path.join(tmpDir, 'cache', 'gamemaster.json');
+    const metaFile = path.join(tmpDir, 'cache', 'cache-meta.json');
+    fs.mkdirSync(path.join(tmpDir, 'cache'), { recursive: true });
+    fs.writeFileSync(gmFile, JSON.stringify(fakeGameMaster), 'utf-8');
+    fs.writeFileSync(metaFile, JSON.stringify({ gamemaster: new Date().toISOString() }), 'utf-8');
+
+    const eliteMap = await getEliteMovesMap();
+    expect(eliteMap.charizard).toEqual(['BLAST_BURN', 'DRAGON_BREATH', 'EMBER', 'WING_ATTACK']);
+    expect(eliteMap.venusaur).toEqual(['FRENZY_PLANT']);
+    expect(eliteMap.pikachu).toEqual([]);
+  });
 });
+
