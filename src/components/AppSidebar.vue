@@ -4,7 +4,18 @@
       <h2>PoGo Team Creator</h2>
     </div>
 
-    <div class="section-title">Ligues</div>
+    <div class="section-header">
+      <span class="section-title">Ligues</span>
+      <button
+        type="button"
+        class="refresh-pvpoke-btn"
+        :class="{ spinning: pokemonStore.isRefreshingPvpoke }"
+        title="Rafraîchir les classements PvPoke"
+        @click="pokemonStore.refreshPvpoke()"
+      >
+        ↻
+      </button>
+    </div>
     <div class="league-selector">
       <button
         v-for="league in leagues"
@@ -39,7 +50,9 @@
         <div class="history-file">{{ item.originalFilename }}</div>
         <div class="history-meta">
           <span>{{ new Date(item.importedAt).toLocaleDateString('fr-FR') }}</span>
-          <span class="added-tag">+{{ item.newPokemonAdded }} Pokémon</span>
+          <span class="added-tag">
+            {{ Number(item.pokemonCountInFile || 0).toLocaleString('fr-FR') }} au total · {{ item.newPokemonAdded > 0 ? `+${Number(item.newPokemonAdded).toLocaleString('fr-FR')} ajoutés` : '0 nouveau' }}
+          </span>
         </div>
       </div>
     </div>
@@ -172,6 +185,30 @@ async function exportMerged() {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
+}
+.refresh-pvpoke-btn {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.95rem;
+  color: #718096;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+.refresh-pvpoke-btn:hover {
+  background: #EDF2F7;
+  color: #2B6CB0;
+  border-color: #CBD5E0;
+}
+.refresh-pvpoke-btn.spinning {
+  animation: spin 1s linear infinite;
+  pointer-events: none;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 .history-list {
   flex: 1;

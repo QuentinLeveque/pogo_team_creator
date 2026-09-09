@@ -17,7 +17,8 @@ export const usePokemonStore = defineStore('pokemon', {
     searchQuery: '',
     sortOption: 'score',
     activeView: 'my-pokemon',
-    excludeXl: false
+    excludeXl: false,
+    isRefreshingPvpoke: false
   }),
   getters: {
     displayedPokemon(state) {
@@ -71,11 +72,12 @@ export const usePokemonStore = defineStore('pokemon', {
       try {
         if (typeof window === 'undefined' || !window.electronAPI) return;
 
-        const [master, rankingsRes, forms, history] = await Promise.all([
+        const [master, rankingsRes, forms, history, eliteMovesMap] = await Promise.all([
           window.electronAPI.getMasterPokemon(),
           window.electronAPI.getRankings(appStore.activeLeague),
           window.electronAPI.getForms(),
-          window.electronAPI.getImportHistory()
+          window.electronAPI.getImportHistory(),
+          window.electronAPI.getEliteMoves ? window.electronAPI.getEliteMoves() : {}
         ]);
 
         appStore.customForms = forms || {};
@@ -85,7 +87,8 @@ export const usePokemonStore = defineStore('pokemon', {
           master || [],
           rankingsRes.data || [],
           appStore.activeLeague,
-          appStore.customForms
+          appStore.customForms,
+          eliteMovesMap || {}
         );
 
         this.rawMatched = matched;
@@ -98,6 +101,23 @@ export const usePokemonStore = defineStore('pokemon', {
         this.error = err.message || 'Erreur de chargement des données';
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async refreshPvpoke() {
+      const appStore = useAppStore();
+      this.isRefreshingPvpoke = true;
+      try {
+        if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.refreshPvpoke) {
+          await window.electronAPI.refreshPvpoke();
+          appStore.showToast('Classements PvPoke actualisés avec succès.');
+        }
+        await this.loadData();
+      } catch (err) {
+        this.error = err.message || 'Erreur lors du rafraîchissement PvPoke';
+        appStore.showToast('Erreur lors du rafraîchissement: ' + err.message);
+      } finally {
+        this.isRefreshingPvpoke = false;
       }
     }
   }
