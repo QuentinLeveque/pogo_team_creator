@@ -35,6 +35,8 @@
     "Poing Final": "single_strike",
     "Normal": "ordinary",
     "Aspect Décidé": "resolute",
+    "Décidé" : "resolute",
+    "Ordinaire" : "ordinary",
     "Noir": "black",
     "Blanc": "white",
     "Taille Mini": "small",
@@ -60,5 +62,6 @@
     "Pom-Pom" : "pom_pom",
     "Eau de Pluie" : "rainy",
     "Solaire" : "sunny",
-    "Blizzard" : "snowy"
+    "Blizzard" : "snowy",
+    "Assaut" : ""
 }
