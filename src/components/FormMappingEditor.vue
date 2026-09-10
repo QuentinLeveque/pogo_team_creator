@@ -182,8 +182,8 @@ async function save() {
 .modal-box {
   background: #FFFFFF;
   border-radius: 12px;
-  width: 760px;
-  max-width: 95%;
+  width: 900px;
+  max-width: 95vw;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -247,6 +247,7 @@ async function save() {
 }
 
 .table-container {
+  overflow-x: auto;
   overflow-y: auto;
   max-height: 340px;
   border: 1px solid #E2E8F0;
@@ -296,6 +297,7 @@ async function save() {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  white-space: nowrap;
 }
 
 .pokemon-info {
@@ -321,6 +323,7 @@ async function save() {
   border-radius: 4px;
   font-size: 0.78rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .id-cell code {
@@ -330,12 +333,14 @@ async function save() {
   border-radius: 4px;
   font-size: 0.78rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: nowrap;
 }
 
 .action-wrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .standard-form-btn {
@@ -363,7 +368,7 @@ async function save() {
 }
 
 .suffix-input {
-  width: 140px;
+  width: 130px;
   padding: 0.35rem 0.55rem;
   border: 1px solid #CBD5E1;
   border-radius: 6px;
