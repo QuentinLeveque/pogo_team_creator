@@ -550,21 +550,21 @@ git commit -m "feat(ui): add visual evolution line with sprites, names and badge
 - Test: ensemble des suites de test (`npm test`)
 - Build: validation du bundle Vite (`npm run build`)
 
-- [ ] **Step 1: Mettre à jour `tests/integration.test.js` pour valider `evolutionLine` et `unmatchedFormDetails`**
+- [x] **Step 1: Mettre à jour `tests/integration.test.js` pour valider `evolutionLine` et `unmatchedFormDetails`**
 
 Dans `tests/integration.test.js`, ajouter la validation de `evolutionLine` sur les données de jeu réel.
 
-- [ ] **Step 2: Exécuter l'ensemble de la suite de tests**
+- [x] **Step 2: Exécuter l'ensemble de la suite de tests**
 
 Exécuter : `npm test`  
 Résultat attendu : 100% de réussite sur toutes les suites (59+ tests).
 
-- [ ] **Step 3: Tester le build de production**
+- [x] **Step 3: Tester le build de production**
 
 Exécuter : `npm run build`  
 Résultat attendu : Build sans erreur.
 
-- [ ] **Step 4: Commiter et finaliser**
+- [x] **Step 4: Commiter et finaliser**
 
 ```bash
 git add tests/integration.test.js
