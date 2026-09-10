@@ -1,6 +1,8 @@
 import { toSpeciesId, speciesIdToFrench } from '../../electron/services/nameTranslator.js';
 import { translateMove } from '../data/moves.js';
 import { calculateResourceCosts } from '../utils/costCalculator.js';
+import frNames from '../data/fr.json';
+import enNames from '../data/en.json';
 
 function parsePercent(val) {
   if (!val) return 0;
@@ -102,6 +104,7 @@ function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ow
 export function matchPokemon(masterList, rankings, league, customForms = {}, eliteMovesMap = {}, metadata = {}) {
   const unmatchedFormsSet = new Set();
   const unmatchedPokemonSet = new Set();
+  const unmatchedDetailsMap = new Map();
   const candidatesBySpecies = new Map();
   const ownedByCurrentSpecies = new Map();
 
@@ -119,6 +122,27 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
           unmatchedFormsSet.add(check.unmatchedForm);
           if (rawNom) {
             unmatchedPokemonSet.add(rawNom);
+          }
+
+          const baseFrIndex = frNames.findIndex(n => n.toLowerCase() === rawNom.trim().toLowerCase());
+          const enBase = baseFrIndex !== -1
+            ? enNames[baseFrIndex].replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase()
+            : rawNom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const formSuffix = fVal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+          const generatedId = `${enBase}_${formSuffix}`;
+
+          const key = `${rawNom}__${fVal}`;
+          if (!unmatchedDetailsMap.has(key)) {
+            const dexNumber = parseInt(row['Pokemon'], 10) || (metadata?.speciesDexMap && (metadata.speciesDexMap[enBase] || metadata.speciesDexMap[rawNom.toLowerCase()])) || 0;
+            unmatchedDetailsMap.set(key, {
+              rawForm: fVal,
+              pokemonNameFr: rawNom,
+              dexNumber,
+              generatedId,
+              count: 1
+            });
+          } else {
+            unmatchedDetailsMap.get(key).count++;
           }
         }
       }
@@ -340,6 +364,7 @@ function moveMatches(specimenMoves, targetNameFr) {
   return {
     matched,
     unmatchedForms: Array.from(unmatchedFormsSet),
-    unmatchedPokemonNames: Array.from(unmatchedPokemonSet)
+    unmatchedPokemonNames: Array.from(unmatchedPokemonSet),
+    unmatchedFormDetails: Array.from(unmatchedDetailsMap.values())
   };
 }

@@ -279,5 +279,33 @@ describe('usePokemonMatcher', () => {
     expect(stage3.dexNumber).toBe(3);
     expect(stage3.isTarget).toBe(true);
   });
+
+  it('collects detailed unmatchedFormDetails with pokemon name, dexNumber and generatedId with underscores', () => {
+    const masterList = [
+      { Nom: 'Pikachu', Forme: 'Costume Fête', Pokemon: '25', PC: '300' },
+      { Nom: 'Pikachu', Forme: 'Costume Fête', Pokemon: '25', PC: '400' },
+      { Nom: 'Kyurem', Forme: 'Forme Bizarre', Pokemon: '646', PC: '2000' }
+    ];
+
+    const speciesDexMap = { pikachu: 25, kyurem: 646 };
+    const { unmatchedFormDetails } = matchPokemon(masterList, [], '1500', {}, {}, { speciesDexMap });
+
+    expect(unmatchedFormDetails).toBeDefined();
+    expect(unmatchedFormDetails.length).toBe(2);
+
+    const pikachuDetail = unmatchedFormDetails.find(d => d.pokemonNameFr === 'Pikachu');
+    expect(pikachuDetail).toBeDefined();
+    expect(pikachuDetail.rawForm).toBe('Costume Fête');
+    expect(pikachuDetail.dexNumber).toBe(25);
+    expect(pikachuDetail.generatedId).toBe('pikachu_costume_fete');
+    expect(pikachuDetail.count).toBe(2);
+
+    const kyuremDetail = unmatchedFormDetails.find(d => d.pokemonNameFr === 'Kyurem');
+    expect(kyuremDetail).toBeDefined();
+    expect(kyuremDetail.rawForm).toBe('Forme Bizarre');
+    expect(kyuremDetail.dexNumber).toBe(646);
+    expect(kyuremDetail.generatedId).toBe('kyurem_forme_bizarre');
+    expect(kyuremDetail.count).toBe(1);
+  });
 });
 

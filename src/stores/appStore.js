@@ -9,6 +9,7 @@ export const useAppStore = defineStore('app', {
     importHistory: [],
     unmatchedForms: [],
     unmatchedPokemonNames: [],
+    unmatchedFormDetails: [],
     customForms: {},
     isImporterOpen: false,
     isFormEditorOpen: false,

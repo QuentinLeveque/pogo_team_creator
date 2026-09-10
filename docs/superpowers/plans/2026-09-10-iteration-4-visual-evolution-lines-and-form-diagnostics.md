@@ -223,7 +223,7 @@ git commit -m "feat(matcher): construct chronological evolutionLine with sprites
   - `unmatchedFormDetails: Array<{ rawForm: string, pokemonNameFr: string, dexNumber: number, generatedId: string, count: number }>`
   - `appStore.unmatchedFormDetails`
 
-- [ ] **Step 1: Écrire le test unitaire pour `unmatchedFormDetails` dans `tests/usePokemonMatcher.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour `unmatchedFormDetails` dans `tests/usePokemonMatcher.test.js`**
 
 Dans `tests/usePokemonMatcher.test.js`, ajouter :
 
@@ -257,12 +257,12 @@ it('collects detailed unmatchedFormDetails with pokemon name, dexNumber and gene
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : FAIL car `unmatchedFormDetails` n'est pas encore retourné.
 
-- [ ] **Step 3: Implémenter la collecte des détails dans `usePokemonMatcher.js` et brancher dans `appStore` / `pokemonStore`**
+- [x] **Step 3: Implémenter la collecte des détails dans `usePokemonMatcher.js` et brancher dans `appStore` / `pokemonStore`**
 
 1. Dans `src/composables/usePokemonMatcher.js` :
    - Maintenir une Map `unmatchedDetailsMap = new Map();` indexée par `${rawNom}_${fVal}`.
@@ -295,12 +295,12 @@ Résultat attendu : FAIL car `unmatchedFormDetails` n'est pas encore retourné.
 3. Dans `src/stores/pokemonStore.js` :
    - Attribuer `appStore.unmatchedFormDetails = unmatchedFormDetails || [];` dans `loadData()`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/composables/usePokemonMatcher.js src/stores/appStore.js src/stores/pokemonStore.js tests/usePokemonMatcher.test.js

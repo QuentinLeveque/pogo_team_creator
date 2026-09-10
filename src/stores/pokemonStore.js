@@ -84,7 +84,7 @@ export const usePokemonStore = defineStore('pokemon', {
         appStore.customForms = forms || {};
         appStore.importHistory = history || [];
 
-        const { matched, unmatchedForms, unmatchedPokemonNames } = matchPokemon(
+        const { matched, unmatchedForms, unmatchedPokemonNames, unmatchedFormDetails } = matchPokemon(
           master || [],
           rankingsRes.data || [],
           appStore.activeLeague,
@@ -96,6 +96,7 @@ export const usePokemonStore = defineStore('pokemon', {
         this.rawMatched = matched;
         appStore.unmatchedForms = unmatchedForms;
         appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
+        appStore.unmatchedFormDetails = unmatchedFormDetails || [];
 
         if (rankingsRes.fromCache && rankingsRes.cachedAt) {
           appStore.showToast(`Données PvPoke en cache (mise à jour: ${new Date(rankingsRes.cachedAt).toLocaleDateString('fr-FR')})`);
