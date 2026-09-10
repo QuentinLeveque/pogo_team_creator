@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const { initCsvManager, getMasterPokemon, importAndMerge, removePokemon, exportMergedCsv, getImportHistory } = require('./services/csvManager');
+const { initCsvManager, getMasterPokemon, importAndMerge, removePokemon, exportMergedCsv, getImportHistory, removeAllCsvs, removeCsvFile } = require('./services/csvManager');
 const { initPvpokeCache, getRankings, getEliteMovesMap, refreshAll, getGamemasterPokemonMetadata } = require('./services/pvpokeCache');
 const { initSettingsManager, getSettings, saveSettings, getForms, saveForms } = require('./services/settingsManager');
 
@@ -43,6 +43,8 @@ ipcMain.handle('csv:import', (e, content, filename) => importAndMerge(content, f
 ipcMain.handle('csv:remove', (e, key) => removePokemon(key));
 ipcMain.handle('csv:export', () => exportMergedCsv());
 ipcMain.handle('csv:getHistory', () => getImportHistory());
+ipcMain.handle('csv:removeAll', () => removeAllCsvs());
+ipcMain.handle('csv:removeFile', (e, historyId) => removeCsvFile(historyId));
 
 ipcMain.handle('pvpoke:getRankings', (e, league, forceRefresh) => getRankings(league, forceRefresh));
 ipcMain.handle('pvpoke:getEliteMoves', () => getEliteMovesMap());

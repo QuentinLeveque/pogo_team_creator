@@ -199,6 +199,91 @@ function exportMergedCsv() {
   return rows.join('\n');
 }
 
+function removeAllCsvs() {
+  const history = getImportHistory();
+  if (originalsDir && fs.existsSync(originalsDir)) {
+    for (const entry of history) {
+      if (entry.storedFilename) {
+        const filePath = path.join(originalsDir, entry.storedFilename);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (e) {
+            console.error('Failed to unlink archive file:', e);
+          }
+        }
+      }
+    }
+  }
+
+  if (masterPath) {
+    fs.writeFileSync(masterPath, JSON.stringify([], null, 2), 'utf-8');
+  }
+  if (historyPath) {
+    fs.writeFileSync(historyPath, JSON.stringify([], null, 2), 'utf-8');
+  }
+
+  return { success: true, totalCount: 0, history: [] };
+}
+
+function removeCsvFile(historyId) {
+  const history = getImportHistory();
+  const index = history.findIndex(h => h.id === historyId);
+  if (index === -1) {
+    throw new Error(`Entrée d'historique non trouvée : ${historyId}`);
+  }
+
+  const target = history[index];
+  if (originalsDir && target.storedFilename) {
+    const targetPath = path.join(originalsDir, target.storedFilename);
+    if (fs.existsSync(targetPath)) {
+      try {
+        fs.unlinkSync(targetPath);
+      } catch (e) {
+        console.error('Failed to unlink target archive file:', e);
+      }
+    }
+  }
+
+  history.splice(index, 1);
+  if (historyPath) {
+    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf-8');
+  }
+
+  // Reconstitute master.json from remaining CSVs
+  const newMaster = [];
+  const existingKeys = new Set();
+
+  for (const entry of history) {
+    if (originalsDir && entry.storedFilename) {
+      const filePath = path.join(originalsDir, entry.storedFilename);
+      if (fs.existsSync(filePath)) {
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          const parsed = parsePokeGenieCsv(content);
+          if (parsed.valid) {
+            for (const item of parsed.data) {
+              const key = getUniqueKey(item);
+              if (!existingKeys.has(key)) {
+                newMaster.push(item);
+                existingKeys.add(key);
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`Failed to reparse ${entry.storedFilename}:`, err);
+        }
+      }
+    }
+  }
+
+  if (masterPath) {
+    fs.writeFileSync(masterPath, JSON.stringify(newMaster, null, 2), 'utf-8');
+  }
+
+  return { success: true, totalCount: newMaster.length, history };
+}
+
 module.exports = {
   initCsvManager,
   parsePokeGenieCsv,
@@ -207,5 +292,7 @@ module.exports = {
   getImportHistory,
   importAndMerge,
   removePokemon,
-  exportMergedCsv
+  exportMergedCsv,
+  removeAllCsvs,
+  removeCsvFile
 };

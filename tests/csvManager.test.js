@@ -10,7 +10,9 @@ import {
   getMasterPokemon,
   removePokemon,
   exportMergedCsv,
-  getImportHistory
+  getImportHistory,
+  removeCsvFile,
+  removeAllCsvs
 } from '../electron/services/csvManager.js';
 
 describe('csvManager', () => {
@@ -82,5 +84,35 @@ describe('csvManager', () => {
     expect(exported).toContain('Index,Nom,Forme');
     expect(exported).toContain('Lixy');
     expect(exported).toContain('Dracaufeu');
+  });
+
+  it('removes a specific CSV file and recalculates master from remaining files', () => {
+    const csv1 = `Index,Nom,Forme,Pokemon,Sexe,PC,PV,Atq IV,Déf IV,Rés IV,IV Moyen,Niveau Min,Niveau Max,Attaque Rapide,Attaque Chargée,Attaque Chargée 2,Date Analyse,Date Attrapée,Poids,Taille,Chanceux,Obscur/Purifié,Favori,Poussières,Rang % (G),Rang # (G),Prod Stat (G),Coût Poussières (G),Coût Bonbon (G),Nom (G),Forme (G),Obs/Pur (G),Rang % (U),Rang # (U),Prod Stat (U),Coût Poussières (U),Coût Bonbon (U),Nom (U),Forme (U),Obs/Pur (U),Rang % (L),Rang # (L),Prod Stat (L),Coût Poussières (L),Coût Bonbon (L),Nom (L),Forme (L),Obs/Pur (L),Marqué pour Utilisation en PvP
+1,Lixy,,403,♂,680,99,12,15,13,88.9,28.0,28.0,,,,"2025-04-24 15:59",18/12/2021,7.37kg,0.45m,1,0,0,4500,80.85%,785,95.55%,111000,223,Luxio,,0,,,,,,,,,,,,,,`;
+    const csv2 = `Index,Nom,Forme,Pokemon,Sexe,PC,PV,Atq IV,Déf IV,Rés IV,IV Moyen,Niveau Min,Niveau Max,Attaque Rapide,Attaque Chargée,Attaque Chargée 2,Date Analyse,Date Attrapée,Poids,Taille,Chanceux,Obscur/Purifié,Favori,Poussières,Rang % (G),Rang # (G),Prod Stat (G),Coût Poussières (G),Coût Bonbon (G),Nom (G),Forme (G),Obs/Pur (G),Rang % (U),Rang # (U),Prod Stat (U),Coût Poussières (U),Coût Bonbon (U),Nom (U),Forme (U),Obs/Pur (U),Rang % (L),Rang # (L),Prod Stat (L),Coût Poussières (L),Coût Bonbon (L),Nom (L),Forme (L),Obs/Pur (L),Marqué pour Utilisation en PvP
+2,Dracaufeu,,6,♂,1480,120,1,15,14,66.7,19.5,19.5,,,,"2025-04-24 16:00",10/05/2022,90.5kg,1.7m,0,0,0,2500,98.2%,15,99.1%,0,0,Dracaufeu,,0,,,,,,,,,,,,,,,`;
+
+    const res1 = importAndMerge(csv1, 'file1.csv');
+    const res2 = importAndMerge(csv2, 'file2.csv');
+    expect(getMasterPokemon().length).toBe(2);
+
+    const removeRes = removeCsvFile(res1.historyEntry.id);
+    expect(removeRes.success).toBe(true);
+    expect(removeRes.totalCount).toBe(1);
+    expect(getMasterPokemon().length).toBe(1);
+    expect(getMasterPokemon()[0].Nom).toBe('Dracaufeu');
+  });
+
+  it('removes all CSVs and completely purges master and history', () => {
+    const csv = `Index,Nom,Forme,Pokemon,Sexe,PC,PV,Atq IV,Déf IV,Rés IV,IV Moyen,Niveau Min,Niveau Max,Attaque Rapide,Attaque Chargée,Attaque Chargée 2,Date Analyse,Date Attrapée,Poids,Taille,Chanceux,Obscur/Purifié,Favori,Poussières,Rang % (G),Rang # (G),Prod Stat (G),Coût Poussières (G),Coût Bonbon (G),Nom (G),Forme (G),Obs/Pur (G),Rang % (U),Rang # (U),Prod Stat (U),Coût Poussières (U),Coût Bonbon (U),Nom (U),Forme (U),Obs/Pur (U),Rang % (L),Rang # (L),Prod Stat (L),Coût Poussières (L),Coût Bonbon (L),Nom (L),Forme (L),Obs/Pur (L),Marqué pour Utilisation en PvP
+1,Lixy,,403,♂,680,99,12,15,13,88.9,28.0,28.0,,,,"2025-04-24 15:59",18/12/2021,7.37kg,0.45m,1,0,0,4500,80.85%,785,95.55%,111000,223,Luxio,,0,,,,,,,,,,,,,,`;
+    importAndMerge(csv, 'file.csv');
+    expect(getMasterPokemon().length).toBe(1);
+
+    const clearRes = removeAllCsvs();
+    expect(clearRes.success).toBe(true);
+    expect(clearRes.totalCount).toBe(0);
+    expect(getMasterPokemon().length).toBe(0);
+    expect(getImportHistory().length).toBe(0);
   });
 });

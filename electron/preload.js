@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removePokemon: (key) => ipcRenderer.invoke('csv:remove', key),
   exportMergedCsv: () => ipcRenderer.invoke('csv:export'),
   getImportHistory: () => ipcRenderer.invoke('csv:getHistory'),
+  removeAllCsvs: () => ipcRenderer.invoke('csv:removeAll'),
+  removeCsvFile: (historyId) => ipcRenderer.invoke('csv:removeFile', historyId),
 
   // PvPoke
   getRankings: (league, forceRefresh) => ipcRenderer.invoke('pvpoke:getRankings', league, forceRefresh),
