@@ -28,7 +28,7 @@
 **Interfaces:**
 - Produces: `translateMove(moveId)` retournant le nom français officiel pour les 350 attaques du Game Master.
 
-- [ ] **Step 1: Write test for complete move translations in `tests/pvpokeCache.test.js`**
+- [x] **Step 1: Write test for complete move translations in `tests/pvpokeCache.test.js`**
 
 Ajouter dans `tests/pvpokeCache.test.js` :
 ```javascript
@@ -44,21 +44,21 @@ Ajouter dans `tests/pvpokeCache.test.js` :
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/pvpokeCache.test.js`  
 Expected: FAIL avec `AERIAL_ACE` ou `AURA_SPHERE` non traduits.
 
-- [ ] **Step 3: Enrich `src/data/moves.json` with all 350 translations**
+- [x] **Step 3: Enrich `src/data/moves.json` with all 350 translations**
 
 Mettre à jour `src/data/moves.json` avec la table complète des traductions françaises officielles pour Pokémon GO.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/pvpokeCache.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/moves.json src/data/moves.js tests/pvpokeCache.test.js
@@ -83,7 +83,7 @@ git commit -m "feat(moves): complete French translations for all 350 Pokémon GO
   - `csv:removeAll`
   - `csv:removeFile`
 
-- [ ] **Step 1: Write failing tests in `tests/csvManager.test.js`**
+- [x] **Step 1: Write failing tests in `tests/csvManager.test.js`**
 
 Ajouter dans `tests/csvManager.test.js` :
 ```javascript
@@ -118,21 +118,21 @@ Ajouter dans `tests/csvManager.test.js` :
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/csvManager.test.js`  
 Expected: FAIL avec `removeCsvFile is not a function` et `removeAllCsvs is not a function`.
 
-- [ ] **Step 3: Implement `removeAllCsvs` and `removeCsvFile` in `electron/services/csvManager.js`**
+- [x] **Step 3: Implement `removeAllCsvs` and `removeCsvFile` in `electron/services/csvManager.js`**
 
 Ajouter et exporter les fonctions `removeAllCsvs` et `removeCsvFile` dans `electron/services/csvManager.js`, puis enregistrer les IPC dans `electron/main.js` et `electron/preload.js`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/csvManager.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add electron/services/csvManager.js electron/main.js electron/preload.js tests/csvManager.test.js
@@ -150,7 +150,7 @@ git commit -m "feat(csv): add removeAllCsvs and removeCsvFile with auto-recalcul
 **Interfaces:**
 - Produces: `speciesStatsMap: { [speciesId]: { maxCp40: number } }` dans `getGamemasterPokemonMetadata()`.
 
-- [ ] **Step 1: Write failing test in `tests/pvpokeCache.test.js`**
+- [x] **Step 1: Write failing test in `tests/pvpokeCache.test.js`**
 
 ```javascript
   it('calculates max CP at level 40 for gamemaster species', async () => {
@@ -163,21 +163,21 @@ git commit -m "feat(csv): add removeAllCsvs and removeCsvFile with auto-recalcul
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/pvpokeCache.test.js`  
 Expected: FAIL avec `speciesStatsMap is undefined`.
 
-- [ ] **Step 3: Implement CP40 calculation in `getGamemasterPokemonMetadata`**
+- [x] **Step 3: Implement CP40 calculation in `getGamemasterPokemonMetadata`**
 
 Calculer le CP max au niveau 40 pour chaque entrée Pokémon du Game Master ayant `baseStats`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/pvpokeCache.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add electron/services/pvpokeCache.js tests/pvpokeCache.test.js
@@ -200,7 +200,7 @@ git commit -m "feat(pvpoke): compute level 40 max CP in gamemaster metadata for 
   - `m.dexNumber` dans `matchups` et `counters`
   - Chaîne `buildEvolutionLine` strictement obscure si la cible est obscure.
 
-- [ ] **Step 1: Write failing tests in `tests/usePokemonMatcher.test.js`**
+- [x] **Step 1: Write failing tests in `tests/usePokemonMatcher.test.js`**
 
 Ajouter des tests vérifiant :
 1. Un Pokémon méta obscur (`ninetales_shadow`) n'est jamais associé à un Goupix normal (`isShadow: false`).
@@ -208,12 +208,12 @@ Ajouter des tests vérifiant :
 3. Détection des attaques d'élite sur le spécimen possédé.
 4. Présence de `dexNumber` pour les puces de matchups/contres.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/usePokemonMatcher.test.js`  
 Expected: FAIL.
 
-- [ ] **Step 3: Implement strict shadow isolation and move metadata in `usePokemonMatcher.js`**
+- [x] **Step 3: Implement strict shadow isolation and move metadata in `usePokemonMatcher.js`**
 
 - Mettre à jour `candidatesBySpecies` pour exiger `candidate.isShadow === isTargetShadow`.
 - Mettre à jour `buildEvolutionLine` pour ajouter le suffixe `_shadow` aux étapes et nommer `Goupix (Obscur)`.
@@ -221,12 +221,12 @@ Expected: FAIL.
 - Ajouter `dexNumber` aux objets `matchups` et `counters`.
 - Ajouter `meta.requiresXl` basé sur `metadata.speciesStatsMap` et le cap de la ligue.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/usePokemonMatcher.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/composables/usePokemonMatcher.js tests/usePokemonMatcher.test.js
@@ -245,16 +245,16 @@ git commit -m "feat(matcher): strict shadow matching, shadow evolution chain, an
 **Interfaces:**
 - `pokemonStore.excludeXl`: boolean, filtrant à la fois `item.mine?.requiresXl` et `item.meta.requiresXl`.
 
-- [ ] **Step 1: Write failing test in `tests/pokemonStore.test.js`**
+- [x] **Step 1: Write failing test in `tests/pokemonStore.test.js`**
 
 Vérifier que `displayedPokemon` exclut les Pokémon du méta nécessitant des bonbons XL même s'ils ne sont pas possédés.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/pokemonStore.test.js`  
 Expected: FAIL.
 
-- [ ] **Step 3: Update `displayedPokemon` getter in `src/stores/pokemonStore.js`**
+- [x] **Step 3: Update `displayedPokemon` getter in `src/stores/pokemonStore.js`**
 
 ```javascript
       if (state.excludeXl) {
@@ -266,12 +266,12 @@ Expected: FAIL.
       }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/pokemonStore.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/stores/pokemonStore.js src/components/SearchBar.vue tests/pokemonStore.test.js
@@ -296,26 +296,26 @@ git commit -m "feat(filter): universal XL filter covering owned specimens and me
   - Puces de matchups/contres avec sprites (`PokemonSprite`) et noms français.
   - Suppression complète des badges CT.
 
-- [ ] **Step 1: Write component tests for `CsvImporter.vue` and `PokemonRow.vue`**
+- [x] **Step 1: Write component tests for `CsvImporter.vue` and `PokemonRow.vue`**
 
 Ajouter les cas de test vérifiant la présence du bouton de suppression CSV et le rendu des deux colonnes d'attaques sans badge CT.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/components/PokemonRow.test.js tests/components/CsvImporter.test.js`  
 Expected: FAIL.
 
-- [ ] **Step 3: Implement UI in `CsvImporter.vue` and `PokemonRow.vue`**
+- [x] **Step 3: Implement UI in `CsvImporter.vue` and `PokemonRow.vue`**
 
 - Mettre à jour `CsvImporter.vue` avec le modal de confirmation, l'appel IPC `removeAllCsvs` et `removeCsvFile`, et la réactivité du store.
 - Mettre à jour `PokemonRow.vue` avec la mise en page 2 colonnes d'attaques, les puces visuelles de matchups et le badge Obscur méta.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/components/PokemonRow.test.js tests/components/CsvImporter.test.js`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/CsvImporter.vue src/components/PokemonRow.vue tests/components/CsvImporter.test.js tests/components/PokemonRow.test.js
@@ -329,21 +329,21 @@ git commit -m "feat(ui): add CSV deletion controls, 2-column moves comparison, a
 **Files:**
 - All modified files
 
-- [ ] **Step 1: Run complete test suite**
+- [x] **Step 1: Run complete test suite**
 
 Run: `npm test`  
 Expected: All 14+ test suites pass with 65+ passing tests.
 
-- [ ] **Step 2: Run production build**
+- [x] **Step 2: Run production build**
 
 Run: `npm run build`  
 Expected: Build succeeds with 0 errors.
 
-- [ ] **Step 3: Relaunch Electron application**
+- [x] **Step 3: Relaunch Electron application**
 
 Relancer l'application en mode développement (`npm run electron:dev`).
 
-- [ ] **Step 4: Commit and update walkthrough**
+- [x] **Step 4: Commit and update walkthrough**
 
 ```bash
 git add -A
