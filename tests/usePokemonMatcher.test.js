@@ -378,5 +378,103 @@ describe('usePokemonMatcher', () => {
     expect(hoopaMatch.mine).not.toBeNull();
     expect(hoopaMatch.mine.name).toBe('Hoopa');
   });
+
+  it('strictly isolates shadow and non-shadow species in matching and evolution line', () => {
+    const masterList = [
+      // Normal Goupix evolving to Feunard
+      {
+        Nom: 'Goupix',
+        Forme: '',
+        'Obscur/Purifié': '0',
+        'Nom (G)': 'Feunard',
+        'Forme (G)': '',
+        'Obs/Pur (G)': '0',
+        'Rang % (G)': '90.0%',
+        'Rang # (G)': '100'
+      },
+      // Shadow Goupix evolving to Shadow Feunard
+      {
+        Nom: 'Goupix',
+        Forme: '',
+        'Obscur/Purifié': '1',
+        'Nom (G)': 'Feunard',
+        'Forme (G)': '',
+        'Obs/Pur (G)': '1',
+        'Rang % (G)': '95.0%',
+        'Rang # (G)': '20',
+        'Attaque Rapide': 'Danse Flammes',
+        'Attaque Chargée': "Ball'Météo",
+        'Attaque Chargée 2': 'Plaquage'
+      }
+    ];
+
+    const mockRankings = [
+      {
+        speciesId: 'ninetales_shadow',
+        score: 96,
+        moveset: ['FIRE_SPIN', 'WEATHER_BALL_FIRE', 'OVERHEAT'],
+        matchups: [{ opponent: 'tinkaton', rating: 600 }],
+        counters: [{ opponent: 'swampert', rating: 400 }]
+      },
+      {
+        speciesId: 'ninetales',
+        score: 91,
+        moveset: ['FIRE_SPIN', 'WEATHER_BALL_FIRE', 'OVERHEAT'],
+        matchups: [],
+        counters: []
+      }
+    ];
+
+    const metadata = {
+      speciesDexMap: { vulpix: 37, ninetales: 38, ninetales_shadow: 38, tinkaton: 959, swampert: 260 },
+      familyMap: {
+        ninetales_shadow: { parent: 'vulpix' },
+        ninetales: { parent: 'vulpix' }
+      },
+      speciesStatsMap: {
+        ninetales_shadow: { maxCp40: 2279 }
+      }
+    };
+
+    const eliteMovesMap = {
+      ninetales_shadow: ['BODY_SLAM', 'EMBER'],
+      ninetales: ['BODY_SLAM', 'EMBER']
+    };
+
+    const { matched } = matchPokemon(masterList, mockRankings, '1500', {}, eliteMovesMap, metadata);
+
+    const shadowMatch = matched.find(m => m.meta.speciesId === 'ninetales_shadow');
+    expect(shadowMatch).toBeDefined();
+    expect(shadowMatch.meta.isShadow).toBe(true);
+    expect(shadowMatch.mine).not.toBeNull();
+    expect(shadowMatch.mine.isShadow).toBe(true);
+    expect(shadowMatch.mine.ivRankPercent).toBe(95.0);
+
+    // Evolution line check for shadow
+    expect(shadowMatch.evolutionLine).toBeDefined();
+    expect(shadowMatch.evolutionLine.length).toBe(2);
+    expect(shadowMatch.evolutionLine[0].isShadow).toBe(true);
+    expect(shadowMatch.evolutionLine[0].frenchName).toContain('Obscur');
+    expect(shadowMatch.evolutionLine[0].isOwned).toBe(true);
+
+    // Check mineMoves with isElite
+    expect(shadowMatch.mine.mineMoves).toBeDefined();
+    expect(shadowMatch.mine.mineMoves.fast.nameFr).toBe('Danse Flammes');
+    expect(shadowMatch.mine.mineMoves.fast.isElite).toBe(false);
+    expect(shadowMatch.mine.mineMoves.charged2.nameFr).toBe('Plaquage');
+    expect(shadowMatch.mine.mineMoves.charged2.isElite).toBe(true);
+
+    // Check matchups have dexNumber
+    expect(shadowMatch.meta.matchups[0].dexNumber).toBe(959);
+    expect(shadowMatch.meta.counters[0].dexNumber).toBe(260);
+
+    // Normal ninetales should match normal Goupix
+    const normalMatch = matched.find(m => m.meta.speciesId === 'ninetales');
+    expect(normalMatch).toBeDefined();
+    expect(normalMatch.meta.isShadow).toBe(false);
+    expect(normalMatch.mine).not.toBeNull();
+    expect(normalMatch.mine.isShadow).toBe(false);
+    expect(normalMatch.mine.ivRankPercent).toBe(90.0);
+  });
 });
 

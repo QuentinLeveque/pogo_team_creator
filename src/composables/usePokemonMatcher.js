@@ -30,6 +30,7 @@ function resolveGamemasterSpeciesId(speciesId, rawNom, isShadow, customForms, sp
 
 function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
   if (!familyMap || !speciesId) return null;
+  const isTargetShadow = speciesId.endsWith('_shadow');
   const cleanId = (id) => id ? id.replace(/_shadow$/, '') : '';
   let curr = speciesId;
   const visited = new Set();
@@ -47,8 +48,9 @@ function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
 
   const allIds = [speciesId, ...chain];
   const frenchNames = allIds.map(id => {
-    const info = speciesIdToFrench(id, customForms);
-    return info.frenchName || id;
+    const info = speciesIdToFrench(cleanId(id), customForms);
+    const baseFr = info.frenchName || id;
+    return isTargetShadow ? `${baseFr} (Obscur)` : baseFr;
   });
 
   return frenchNames.join(' ⇽ ');
@@ -56,6 +58,7 @@ function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
 
 function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedByCurrentSpecies, currentChosen) {
   if (!familyMap || !speciesId) return [];
+  const isTargetShadow = speciesId.endsWith('_shadow');
   const cleanId = (id) => id ? id.replace(/_shadow$/, '') : '';
   let curr = speciesId;
   const visited = new Set();
@@ -74,11 +77,16 @@ function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ow
 
   return allIds.map(stageId => {
     const cleanStageId = cleanId(stageId);
+    const isStageShadow = isTargetShadow || stageId.endsWith('_shadow');
+    const stageLookupId = isStageShadow && !cleanStageId.endsWith('_shadow') ? `${cleanStageId}_shadow` : cleanStageId;
     const dexNumber = (speciesDexMap && (speciesDexMap[stageId] || speciesDexMap[cleanStageId])) || 0;
-    const { frenchName } = speciesIdToFrench(stageId, customForms);
+    let { frenchName } = speciesIdToFrench(cleanStageId, customForms);
+    if (isStageShadow) {
+      frenchName = `${frenchName} (Obscur)`;
+    }
     const isTarget = stageId === speciesId;
 
-    const ownedList = ownedByCurrentSpecies ? (ownedByCurrentSpecies.get(stageId) || ownedByCurrentSpecies.get(cleanStageId) || []) : [];
+    const ownedList = ownedByCurrentSpecies ? (ownedByCurrentSpecies.get(stageLookupId) || []) : [];
     const bestOwned = ownedList.length > 0 ? ownedList[0] : null;
 
     let isOwned = false;
@@ -93,7 +101,7 @@ function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ow
         ivAverage: bestOwned.ivAverage || undefined,
         isCurrent: Boolean(currentChosen && currentChosen.uniqueKey === bestOwned.uniqueKey)
       };
-    } else if (isTarget && currentChosen && (currentChosen.name || '').toLowerCase() === (frenchName || '').toLowerCase()) {
+    } else if (isTarget && currentChosen && (currentChosen.name || '').toLowerCase() === (cleanStageId.toLowerCase() || (frenchName || '').toLowerCase())) {
       isOwned = true;
       ownedCandidate = {
         name: currentChosen.name,
@@ -106,9 +114,12 @@ function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ow
 
     return {
       speciesId: stageId,
+      stageId,
       dexNumber,
       nameFr: frenchName || stageId,
+      frenchName: frenchName || stageId,
       isTarget,
+      isShadow: isStageShadow,
       isOwned,
       ownedCandidate
     };
@@ -255,8 +266,11 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
   }
 
   for (const [speciesId, candidates] of candidatesBySpecies.entries()) {
-    const evolvedCandidates = candidates.filter(c => (c.name || '').toLowerCase() === (c.targetEvolvedName || '').toLowerCase());
-    const unevolvedCandidates = candidates.filter(c => (c.name || '').toLowerCase() !== (c.targetEvolvedName || '').toLowerCase());
+    const isTargetShadow = speciesId.endsWith('_shadow');
+    const compatibleCandidates = candidates.filter(c => Boolean(c.isShadow) === isTargetShadow);
+
+    const evolvedCandidates = compatibleCandidates.filter(c => (c.name || '').toLowerCase() === (c.targetEvolvedName || '').toLowerCase());
+    const unevolvedCandidates = compatibleCandidates.filter(c => (c.name || '').toLowerCase() !== (c.targetEvolvedName || '').toLowerCase());
 
     evolvedCandidates.sort(sortCandidates);
     unevolvedCandidates.sort(sortCandidates);
@@ -298,15 +312,48 @@ function moveMatches(specimenMoves, targetNameFr) {
   });
 }
 
+  const speciesDexMap = metadata?.speciesDexMap || {};
+  const familyMap = metadata?.familyMap || {};
+  const speciesStatsMap = metadata?.speciesStatsMap || {};
+  const leagueCap = league === '1500' ? 1500 : (league === '2500' ? 2500 : Infinity);
+
   const matched = rankings.map((ranking, index) => {
     const speciesId = ranking.speciesId;
-    const { frenchName } = speciesIdToFrench(speciesId, customForms);
+    const isTargetShadow = speciesId.endsWith('_shadow');
+    const cleanSpeciesId = speciesId ? speciesId.replace(/_shadow$/, '') : '';
+    const { frenchName } = speciesIdToFrench(cleanSpeciesId, customForms);
     const owned = ownedCandidatesBySpecies.get(speciesId) || null;
 
-    const eliteMoves = (eliteMovesMap && eliteMovesMap[speciesId]) || [];
+    const eliteMoves = (eliteMovesMap && eliteMovesMap[speciesId]) || (eliteMovesMap && eliteMovesMap[cleanSpeciesId]) || [];
     const specimenMoves = owned
       ? [owned.fastMove, owned.chargedMove1, owned.chargedMove2].filter(Boolean)
       : [];
+
+    if (owned) {
+      const mineFastFr = owned.fastMove || '';
+      const mineC1Fr = owned.chargedMove1 || '';
+      const mineC2Fr = owned.chargedMove2 || '';
+      const eliteMoveNamesFr = eliteMoves.map(emId => translateMove(emId));
+      const isMineMoveElite = (moveNameFr) => {
+        if (!moveNameFr) return false;
+        return eliteMoveNamesFr.some(emFr => moveMatches([moveNameFr], emFr));
+      };
+
+      owned.mineMoves = {
+        fast: {
+          nameFr: mineFastFr,
+          isElite: isMineMoveElite(mineFastFr)
+        },
+        charged1: {
+          nameFr: mineC1Fr,
+          isElite: isMineMoveElite(mineC1Fr)
+        },
+        charged2: {
+          nameFr: mineC2Fr,
+          isElite: isMineMoveElite(mineC2Fr)
+        }
+      };
+    }
 
     const moveset = ranking.moveset || [];
     const fastId = moveset[0] || '';
@@ -332,25 +379,31 @@ function moveMatches(specimenMoves, targetNameFr) {
 
     const matchups = (ranking.matchups || []).slice(0, 5).map(m => {
       const info = speciesIdToFrench(m.opponent, customForms);
+      const cleanOpponentId = (m.opponent || '').replace(/_shadow$/, '');
+      const oppDex = speciesDexMap[m.opponent] || speciesDexMap[cleanOpponentId] || 0;
       return {
         opponent: m.opponent,
         opponentNameFr: info.frenchName + (info.isShadow ? ' (Obs)' : ''),
-        rating: m.rating
+        rating: m.rating,
+        dexNumber: oppDex
       };
     });
 
     const counters = (ranking.counters || []).slice(0, 5).map(c => {
       const info = speciesIdToFrench(c.opponent, customForms);
+      const cleanOpponentId = (c.opponent || '').replace(/_shadow$/, '');
+      const oppDex = speciesDexMap[c.opponent] || speciesDexMap[cleanOpponentId] || 0;
       return {
         opponent: c.opponent,
         opponentNameFr: info.frenchName + (info.isShadow ? ' (Obs)' : ''),
-        rating: c.rating
+        rating: c.rating,
+        dexNumber: oppDex
       };
     });
 
-    const speciesDexMap = metadata?.speciesDexMap || {};
-    const familyMap = metadata?.familyMap || {};
-    const cleanSpeciesId = speciesId ? speciesId.replace(/_shadow$/, '') : '';
+    const maxCp40 = (speciesStatsMap[speciesId] || speciesStatsMap[cleanSpeciesId])?.maxCp40 || 9999;
+    const metaRequiresXl = leagueCap !== Infinity && maxCp40 < leagueCap;
+
     const dexNumber = ranking.dex || speciesDexMap[speciesId] || speciesDexMap[cleanSpeciesId] || (owned ? owned.dexNumber : 0);
     const reverseEvolutionPath = buildReverseEvolutionPath(speciesId, familyMap, customForms);
     const evolutionLine = buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedByCurrentSpecies, owned);
@@ -359,10 +412,12 @@ function moveMatches(specimenMoves, targetNameFr) {
       meta: {
         speciesId,
         dexNumber,
+        isShadow: isTargetShadow,
+        requiresXl: metaRequiresXl,
         reverseEvolutionPath,
         evolutionLine,
         speciesName: ranking.speciesName,
-        nameFr: frenchName,
+        nameFr: isTargetShadow ? `${frenchName} (Obscur)` : frenchName,
         score: ranking.score,
         rank: index + 1,
         types: ranking.types || [],
@@ -373,6 +428,7 @@ function moveMatches(specimenMoves, targetNameFr) {
         matchups,
         counters
       },
+      evolutionLine,
       mine: owned
     };
   });
