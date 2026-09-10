@@ -24,7 +24,7 @@ describe('CsvImporter.vue', () => {
     expect(wrapper.text()).toContain('50 Pokémon');
   });
 
-  it('deletes an individual file from history list', async () => {
+  it('shows confirmation modal before deleting an individual file from history list', async () => {
     const appStore = useAppStore();
     const pokemonStore = usePokemonStore();
     appStore.isImporterOpen = true;
@@ -41,11 +41,31 @@ describe('CsvImporter.vue', () => {
     const deleteBtn = wrapper.find('.delete-csv-btn');
     expect(deleteBtn.exists()).toBe(true);
 
+    // Initial state: no confirmation modal
+    expect(wrapper.find('.confirm-backdrop').exists()).toBe(false);
+
+    // Click trash button -> opens confirmation modal
     await deleteBtn.trigger('click');
+    expect(wrapper.find('.confirm-backdrop').exists()).toBe(true);
+    expect(wrapper.find('.confirm-modal-box').text()).toContain('Supprimer ce fichier CSV ?');
+    expect(wrapper.find('.confirm-modal-box').text()).toContain('batch1.csv');
+
+    // Click cancel -> closes modal without calling API
+    const cancelBtn = wrapper.find('.confirm-modal-box .btn-cancel');
+    await cancelBtn.trigger('click');
+    expect(wrapper.find('.confirm-backdrop').exists()).toBe(false);
+    expect(window.electronAPI.removeCsvFile).not.toHaveBeenCalled();
+
+    // Open again and confirm
+    await deleteBtn.trigger('click');
+    expect(wrapper.find('.confirm-backdrop').exists()).toBe(true);
+    const confirmBtn = wrapper.find('.confirm-modal-box .confirm-delete-btn');
+    await confirmBtn.trigger('click');
     await flushPromises();
 
     expect(window.electronAPI.removeCsvFile).toHaveBeenCalledWith('h1');
     expect(pokemonStore.loadData).toHaveBeenCalled();
+    expect(wrapper.find('.confirm-backdrop').exists()).toBe(false);
   });
 
   it('shows confirmation modal and clears all CSVs', async () => {

@@ -49,7 +49,7 @@ describe('AppSidebar.vue', () => {
     expect(pokemonStore.refreshPvpoke).toHaveBeenCalled();
   });
 
-  it('allows deleting an individual CSV file and calls removeCsvFile', async () => {
+  it('shows confirmation modal before deleting an individual CSV file and calls removeCsvFile on confirm', async () => {
     const appStore = useAppStore();
     const pokemonStore = usePokemonStore();
     pokemonStore.loadData = vi.fn().mockResolvedValue();
@@ -66,9 +66,31 @@ describe('AppSidebar.vue', () => {
     const deleteBtn = wrapper.find('.delete-csv-btn');
     expect(deleteBtn.exists()).toBe(true);
 
+    // Initial state: no confirmation modal
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(false);
+
+    // Click trash button -> opens confirmation modal
     await deleteBtn.trigger('click');
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(true);
+    expect(wrapper.find('.confirm-modal-box').text()).toContain('Supprimer ce fichier CSV ?');
+    expect(wrapper.find('.confirm-modal-box').text()).toContain('file1.csv');
+
+    // Click Annuler -> cancels and closes modal without deleting
+    const cancelBtn = wrapper.find('.btn-cancel');
+    await cancelBtn.trigger('click');
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(false);
+    expect(window.electronAPI.removeCsvFile).not.toHaveBeenCalled();
+
+    // Open modal again and confirm
+    await deleteBtn.trigger('click');
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(true);
+    const confirmBtn = wrapper.find('.confirm-delete-btn');
+    await confirmBtn.trigger('click');
+    await flushPromises();
+
     expect(window.electronAPI.removeCsvFile).toHaveBeenCalledWith('f1');
     expect(pokemonStore.loadData).toHaveBeenCalled();
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(false);
   });
 
   it('displays confirmation modal on "Tout effacer" and calls removeAllCsvs on confirmation', async () => {

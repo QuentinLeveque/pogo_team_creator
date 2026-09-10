@@ -64,7 +64,7 @@
             type="button"
             class="delete-csv-btn"
             title="Supprimer ce fichier"
-            @click="handleDeleteFile(item.id)"
+            @click="fileToDelete = item"
           >
             🗑️
           </button>
@@ -90,6 +90,21 @@
       </div>
     </div>
 
+    <!-- Single CSV Deletion Confirmation Modal -->
+    <div v-if="fileToDelete" class="modal-backdrop">
+      <div class="confirm-modal-box">
+        <h4>Supprimer ce fichier CSV ?</h4>
+        <p>
+          Voulez-vous vraiment supprimer le fichier <strong>« {{ fileToDelete.originalFilename }} »</strong> ?
+          La collection sera recalculée à partir des fichiers restants. Cette action est irréversible.
+        </p>
+        <div class="confirm-modal-actions">
+          <button type="button" class="btn-cancel" @click="fileToDelete = null">Annuler</button>
+          <button type="button" class="confirm-delete-btn" @click="confirmDeleteSingle">Confirmer la suppression</button>
+        </div>
+      </div>
+    </div>
+
     <div class="sidebar-footer">
       <button class="export-btn" @click="exportMerged">
         📥 Exporter CSV fusionné
@@ -107,6 +122,14 @@ const appStore = useAppStore();
 const pokemonStore = usePokemonStore();
 
 const showClearAllModal = ref(false);
+const fileToDelete = ref(null);
+
+async function confirmDeleteSingle() {
+  if (!fileToDelete.value) return;
+  const id = fileToDelete.value.id;
+  fileToDelete.value = null;
+  await handleDeleteFile(id);
+}
 
 async function handleDeleteFile(id) {
   if (typeof window === 'undefined' || !window.electronAPI) return;

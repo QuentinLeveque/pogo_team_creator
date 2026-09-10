@@ -48,7 +48,7 @@
               type="button"
               class="delete-csv-btn"
               title="Supprimer ce fichier"
-              @click="handleDeleteFile(item.id)"
+              @click="fileToDelete = item"
             >
               🗑️
             </button>
@@ -64,6 +64,21 @@
           <div class="confirm-modal-actions">
             <button type="button" class="btn-cancel" @click="showClearAllModal = false">Annuler</button>
             <button type="button" class="confirm-delete-btn" @click="handleClearAll">Confirmer la suppression</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single CSV Deletion Confirmation Modal -->
+      <div v-if="fileToDelete" class="confirm-backdrop">
+        <div class="confirm-modal-box">
+          <h4>Supprimer ce fichier CSV ?</h4>
+          <p>
+            Voulez-vous vraiment supprimer le fichier <strong>« {{ fileToDelete.originalFilename }} »</strong> ?
+            La collection sera recalculée à partir des fichiers restants. Cette action est irréversible.
+          </p>
+          <div class="confirm-modal-actions">
+            <button type="button" class="btn-cancel" @click="fileToDelete = null">Annuler</button>
+            <button type="button" class="confirm-delete-btn" @click="confirmDeleteSingle">Confirmer la suppression</button>
           </div>
         </div>
       </div>
@@ -87,12 +102,21 @@ const isDragging = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const showClearAllModal = ref(false);
+const fileToDelete = ref(null);
 
 function close() {
   appStore.isImporterOpen = false;
   errorMessage.value = '';
   successMessage.value = '';
   showClearAllModal.value = false;
+  fileToDelete.value = null;
+}
+
+async function confirmDeleteSingle() {
+  if (!fileToDelete.value) return;
+  const id = fileToDelete.value.id;
+  fileToDelete.value = null;
+  await handleDeleteFile(id);
 }
 
 async function handleDeleteFile(id) {
