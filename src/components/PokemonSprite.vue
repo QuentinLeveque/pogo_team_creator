@@ -31,7 +31,7 @@ const hasError = ref(false);
 const spriteUrl = computed(() => {
   const num = parseInt(props.dexNumber, 10);
   if (!num || isNaN(num) || num <= 0) return '';
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${num}.png`;
+  return `/sprites/${num}.png`;
 });
 
 function handleError() {
