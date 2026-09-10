@@ -32,4 +32,16 @@ describe('FormMappingEditor.vue', () => {
       'Terrestre': 'land'
     });
   });
+
+  it('displays the list of affected Pokemon names in the modal', () => {
+    const appStore = useAppStore();
+    appStore.isFormEditorOpen = true;
+    appStore.unmatchedForms = ['Forme Bizarre'];
+    appStore.unmatchedPokemonNames = ['Deoxys', 'Necrozma'];
+
+    const wrapper = mount(FormMappingEditor);
+    const pokemonBox = wrapper.find('.affected-pokemon-box');
+    expect(pokemonBox.exists()).toBe(true);
+    expect(pokemonBox.text()).toContain('Deoxys, Necrozma');
+  });
 });

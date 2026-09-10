@@ -11,6 +11,10 @@
         Entrez le suffixe anglais correspondant (ex: <code>galarian</code>, <code>origin</code>, <code>mega</code>, <code>therian</code>).
       </p>
 
+      <div v-if="appStore.unmatchedPokemonNames && appStore.unmatchedPokemonNames.length > 0" class="affected-pokemon-box">
+        <strong>Pokémon concernés :</strong> {{ appStore.unmatchedPokemonNames.join(', ') }}
+      </div>
+
       <div class="form-mappings-list">
         <div v-for="form in appStore.unmatchedForms" :key="form" class="mapping-row">
           <span class="french-form">{{ form }}</span>
@@ -116,6 +120,16 @@ async function save() {
   color: #4A5568;
   line-height: 1.4;
   margin-bottom: 1.25rem;
+}
+.affected-pokemon-box {
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  color: #92400E;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
 }
 .form-mappings-list {
   max-height: 250px;

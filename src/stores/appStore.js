@@ -8,6 +8,7 @@ export const useAppStore = defineStore('app', {
     sortOption: 'score', // 'score' | 'ivRank' | 'name' | 'cost'
     importHistory: [],
     unmatchedForms: [],
+    unmatchedPokemonNames: [],
     customForms: {},
     isImporterOpen: false,
     isFormEditorOpen: false,

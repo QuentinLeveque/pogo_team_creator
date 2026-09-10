@@ -72,27 +72,30 @@ export const usePokemonStore = defineStore('pokemon', {
       try {
         if (typeof window === 'undefined' || !window.electronAPI) return;
 
-        const [master, rankingsRes, forms, history, eliteMovesMap] = await Promise.all([
+        const [master, rankingsRes, forms, history, eliteMovesMap, pokemonMetadata] = await Promise.all([
           window.electronAPI.getMasterPokemon(),
           window.electronAPI.getRankings(appStore.activeLeague),
           window.electronAPI.getForms(),
           window.electronAPI.getImportHistory(),
-          window.electronAPI.getEliteMoves ? window.electronAPI.getEliteMoves() : {}
+          window.electronAPI.getEliteMoves ? window.electronAPI.getEliteMoves() : {},
+          window.electronAPI.getPokemonMetadata ? window.electronAPI.getPokemonMetadata() : null
         ]);
 
         appStore.customForms = forms || {};
         appStore.importHistory = history || [];
 
-        const { matched, unmatchedForms } = matchPokemon(
+        const { matched, unmatchedForms, unmatchedPokemonNames } = matchPokemon(
           master || [],
           rankingsRes.data || [],
           appStore.activeLeague,
           appStore.customForms,
-          eliteMovesMap || {}
+          eliteMovesMap || {},
+          pokemonMetadata || {}
         );
 
         this.rawMatched = matched;
         appStore.unmatchedForms = unmatchedForms;
+        appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
 
         if (rankingsRes.fromCache && rankingsRes.cachedAt) {
           appStore.showToast(`Données PvPoke en cache (mise à jour: ${new Date(rankingsRes.cachedAt).toLocaleDateString('fr-FR')})`);
