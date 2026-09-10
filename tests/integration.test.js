@@ -79,4 +79,41 @@ describe('Real-world Data Integration Test', () => {
     expect(hydroCannon).toBeDefined();
     expect(hydroCannon.isElite).toBe(true);
   });
+
+  it('extracts reverse evolution path, assigns dexNumber and verifies local sprite exists', () => {
+    const speciesDexMap = {
+      venusaur: 3,
+      ivysaur: 2,
+      bulbasaur: 1,
+      swampert: 260,
+      marshtomp: 259,
+      mudkip: 258
+    };
+    const familyMap = {
+      venusaur: { id: 'FAMILY_BULBASAUR', parent: 'ivysaur' },
+      ivysaur: { id: 'FAMILY_BULBASAUR', parent: 'bulbasaur' },
+      bulbasaur: { id: 'FAMILY_BULBASAUR' },
+      swampert: { id: 'FAMILY_MUDKIP', parent: 'marshtomp' },
+      marshtomp: { id: 'FAMILY_MUDKIP', parent: 'mudkip' },
+      mudkip: { id: 'FAMILY_MUDKIP' }
+    };
+
+    const rankings = [
+      { speciesId: 'swampert', score: 92, moveset: ['MUD_SHOT', 'HYDRO_CANNON'] },
+      { speciesId: 'venusaur', score: 85, moveset: ['VINE_WHIP', 'FRENZY_PLANT'] }
+    ];
+
+    const { matched } = matchPokemon([], rankings, '1500', {}, {}, { speciesDexMap, familyMap });
+    const swampert = matched.find(m => m.meta.speciesId === 'swampert');
+    expect(swampert.meta.dexNumber).toBe(260);
+    expect(swampert.meta.reverseEvolutionPath).toBe('Laggron ⇽ Flobio ⇽ Gobou');
+
+    const venusaur = matched.find(m => m.meta.speciesId === 'venusaur');
+    expect(venusaur.meta.dexNumber).toBe(3);
+    expect(venusaur.meta.reverseEvolutionPath).toBe('Florizarre ⇽ Herbizarre ⇽ Bulbizarre');
+
+    // Verify local sprite files exist in public/sprites
+    expect(fs.existsSync(path.resolve(__dirname, '../public/sprites/260.png'))).toBe(true);
+    expect(fs.existsSync(path.resolve(__dirname, '../public/sprites/3.png'))).toBe(true);
+  });
 });
