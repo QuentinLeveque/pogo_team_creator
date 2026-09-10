@@ -12,12 +12,56 @@ function parseNumber(val) {
   return parseFloat(String(val).replace(',', '.')) || 0;
 }
 
-export function matchPokemon(masterList, rankings, league, customForms = {}, eliteMovesMap = {}) {
+function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
+  if (!familyMap || !speciesId) return null;
+  const cleanId = (id) => id ? id.replace(/_shadow$/, '') : '';
+  let curr = speciesId;
+  const visited = new Set();
+  const chain = [];
+
+  while (curr && !visited.has(curr)) {
+    visited.add(curr);
+    const entry = familyMap[curr] || familyMap[cleanId(curr)];
+    if (!entry || !entry.parent) break;
+    chain.push(entry.parent);
+    curr = entry.parent;
+  }
+
+  if (chain.length === 0) return null;
+
+  const allIds = [speciesId, ...chain];
+  const frenchNames = allIds.map(id => {
+    const info = speciesIdToFrench(id, customForms);
+    return info.frenchName || id;
+  });
+
+  return frenchNames.join(' ⇽ ');
+}
+
+export function matchPokemon(masterList, rankings, league, customForms = {}, eliteMovesMap = {}, metadata = {}) {
   const unmatchedFormsSet = new Set();
+  const unmatchedPokemonSet = new Set();
   const candidatesBySpecies = new Map();
 
   const isMaster = league === '10000';
   const suffix = league === '1500' ? ' (G)' : league === '2500' ? ' (U)' : league === '500' ? ' (L)' : '';
+
+  // Scan masterList for unknown forms across all specimens
+  for (const row of masterList) {
+    const rawNom = row['Nom'] || '';
+    const formsToCheck = new Set([row['Forme'], row[`Forme${suffix}`]].filter(Boolean));
+    for (const fVal of formsToCheck) {
+      if (fVal.trim() !== '' && fVal.trim() !== 'Normale') {
+        const check = toSpeciesId(rawNom, fVal, false, customForms);
+        if (check.unmatched && check.unmatchedForm) {
+          unmatchedFormsSet.add(check.unmatchedForm);
+          if (rawNom) {
+            unmatchedPokemonSet.add(rawNom);
+          }
+        }
+      }
+    }
+  }
 
   for (const row of masterList) {
     let targetName = '';
@@ -189,10 +233,17 @@ function moveMatches(specimenMoves, targetNameFr) {
       };
     });
 
+    const speciesDexMap = metadata?.speciesDexMap || {};
+    const familyMap = metadata?.familyMap || {};
+    const cleanSpeciesId = speciesId ? speciesId.replace(/_shadow$/, '') : '';
+    const dexNumber = ranking.dex || speciesDexMap[speciesId] || speciesDexMap[cleanSpeciesId] || (owned ? owned.dexNumber : 0);
+    const reverseEvolutionPath = buildReverseEvolutionPath(speciesId, familyMap, customForms);
+
     return {
       meta: {
         speciesId,
-        dexNumber: ranking.dex || (owned ? owned.dexNumber : 0),
+        dexNumber,
+        reverseEvolutionPath,
         speciesName: ranking.speciesName,
         nameFr: frenchName,
         score: ranking.score,
@@ -211,6 +262,7 @@ function moveMatches(specimenMoves, targetNameFr) {
 
   return {
     matched,
-    unmatchedForms: Array.from(unmatchedFormsSet)
+    unmatchedForms: Array.from(unmatchedFormsSet),
+    unmatchedPokemonNames: Array.from(unmatchedPokemonSet)
   };
 }

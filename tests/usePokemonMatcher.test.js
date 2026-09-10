@@ -178,5 +178,51 @@ describe('usePokemonMatcher', () => {
     expect(moves.charged[1].isElite).toBe(false);
     expect(moves.charged[1].isKnown).toBe(false); // not learned
   });
+
+  it('computes reverseEvolutionPath for unowned evolved pokemon and assigns dexNumber', () => {
+    const masterList = []; // Utilisateur ne possède rien
+    const rankings = [
+      {
+        speciesId: 'venusaur',
+        speciesName: 'Venusaur',
+        moveset: ['VINE_WHIP', 'FRENZY_PLANT']
+      },
+      {
+        speciesId: 'skarmory',
+        speciesName: 'Skarmory',
+        moveset: ['STEEL_WING', 'BRAVE_BIRD']
+      }
+    ];
+
+    const speciesDexMap = { venusaur: 3, ivysaur: 2, bulbasaur: 1, skarmory: 227 };
+    const familyMap = {
+      venusaur: { id: 'FAMILY_BULBASAUR', parent: 'ivysaur' },
+      ivysaur: { id: 'FAMILY_BULBASAUR', parent: 'bulbasaur' },
+      bulbasaur: { id: 'FAMILY_BULBASAUR' },
+      skarmory: { id: 'FAMILY_SKARMORY' }
+    };
+
+    const { matched } = matchPokemon(masterList, rankings, '1500', {}, {}, { speciesDexMap, familyMap });
+
+    const venusaur = matched.find(m => m.meta.speciesId === 'venusaur');
+    expect(venusaur.meta.dexNumber).toBe(3);
+    expect(venusaur.meta.reverseEvolutionPath).toBe('Florizarre ⇽ Herbizarre ⇽ Bulbizarre');
+
+    const skarmory = matched.find(m => m.meta.speciesId === 'skarmory');
+    expect(skarmory.meta.dexNumber).toBe(227);
+    expect(skarmory.meta.reverseEvolutionPath).toBeNull(); // Forme de base
+  });
+
+  it('returns unique unmatchedPokemonNames when specimens have unknown forms', () => {
+    const masterList = [
+      { Nom: 'Deoxys', Forme: 'FormeInconnue1', 'Atq IV': '10', 'Déf IV': '10', 'Rés IV': '10', 'Date Attrapée': '2025-01-01', PC: '1000' },
+      { Nom: 'Deoxys', Forme: 'FormeInconnue2', 'Atq IV': '12', 'Déf IV': '12', 'Rés IV': '12', 'Date Attrapée': '2025-01-02', PC: '1100' },
+      { Nom: 'Kyurem', Forme: 'FormeInconnue3', 'Atq IV': '15', 'Déf IV': '15', 'Rés IV': '15', 'Date Attrapée': '2025-01-03', PC: '2000' }
+    ];
+
+    const { unmatchedForms, unmatchedPokemonNames } = matchPokemon(masterList, [], '1500');
+    expect(unmatchedForms.length).toBe(3);
+    expect(unmatchedPokemonNames).toEqual(['Deoxys', 'Kyurem']);
+  });
 });
 
