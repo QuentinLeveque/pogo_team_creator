@@ -35,7 +35,7 @@
 - Consumes: `dexNumber` (ex: 6, 25, 260)
 - Produces: `spriteUrl = computed(() => '/sprites/' + num + '.png')`
 
-- [ ] **Step 1: Mettre à jour le test unitaire pour `PokemonSprite.vue` afin de vérifier l'utilisation de l'asset local**
+- [x] **Step 1: Mettre à jour le test unitaire pour `PokemonSprite.vue` afin de vérifier l'utilisation de l'asset local**
 
 Dans `tests/components/PokemonSprite.test.js` :
 
@@ -67,12 +67,12 @@ describe('PokemonSprite.vue', () => {
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/PokemonSprite.test.js`  
 Résultat attendu : FAIL car `PokemonSprite.vue` pointe encore vers l'URL externe GitHub.
 
-- [ ] **Step 3: Créer le script de téléchargement des sprites et peupler `public/sprites/`**
+- [x] **Step 3: Créer le script de téléchargement des sprites et peupler `public/sprites/`**
 
 Créer `scripts/downloadSprites.js` pour télécharger les 1 025 sprites en parallèle par lots et les enregistrer dans `public/sprites/` :
 
@@ -121,7 +121,7 @@ main();
 
 Exécuter : `node scripts/downloadSprites.js`
 
-- [ ] **Step 4: Mettre à jour `PokemonSprite.vue` pour utiliser `/sprites/${num}.png`**
+- [x] **Step 4: Mettre à jour `PokemonSprite.vue` pour utiliser `/sprites/${num}.png`**
 
 Dans `src/components/PokemonSprite.vue` :
 ```javascript
@@ -132,12 +132,12 @@ const spriteUrl = computed(() => {
 });
 ```
 
-- [ ] **Step 5: Exécuter le test pour vérifier son succès**
+- [x] **Step 5: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/PokemonSprite.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 6: Commiter les changements**
+- [x] **Step 6: Commiter les changements**
 
 ```bash
 git add public/sprites scripts/downloadSprites.js src/components/PokemonSprite.vue tests/components/PokemonSprite.test.js
@@ -161,7 +161,7 @@ git commit -m "feat(sprites): bundle all 1025 pixel sprites locally for 100% off
   - IPC handler: `pvpoke:getPokemonMetadata`
   - Preload: `window.electronAPI.getPokemonMetadata()`
 
-- [ ] **Step 1: Écrire le test unitaire pour l'extraction des métadonnées Pokémon (dex & family) dans `tests/pvpokeCache.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour l'extraction des métadonnées Pokémon (dex & family) dans `tests/pvpokeCache.test.js`**
 
 Dans `tests/pvpokeCache.test.js`, ajouter :
 
@@ -189,12 +189,12 @@ it('extracts speciesDexMap and familyMap from gamemaster correctly', async () =>
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/pvpokeCache.test.js`  
 Résultat attendu : FAIL car `getGamemasterPokemonMetadata` n'existe pas encore.
 
-- [ ] **Step 3: Implémenter `getGamemasterPokemonMetadata` dans `electron/services/pvpokeCache.js`**
+- [x] **Step 3: Implémenter `getGamemasterPokemonMetadata` dans `electron/services/pvpokeCache.js`**
 
 Ajouter dans `electron/services/pvpokeCache.js` :
 ```javascript
@@ -227,12 +227,12 @@ async function getGamemasterPokemonMetadata(forceRefresh = false) {
 ```
 Exposer `getGamemasterPokemonMetadata` dans `module.exports`, brancher l'IPC dans `electron/main.js` et le pont dans `electron/preload.js`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/pvpokeCache.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add electron/services/pvpokeCache.js electron/main.js electron/preload.js tests/pvpokeCache.test.js
@@ -255,7 +255,7 @@ git commit -m "feat(pvpoke): extract speciesDexMap and familyMap from gamemaster
   - `meta.reverseEvolutionPath` : chaîne française inversée (ex: `'Florizarre ⇽ Herbizarre ⇽ Bulbizarre'`) ou `null` si forme de base
   - `unmatchedPokemonNames: string[]` contenant les noms uniques français des Pokémon qui ont une forme non reconnue
 
-- [ ] **Step 1: Écrire les tests unitaires pour la chaîne d'évolution inversée, les dexNumbers globaux et `unmatchedPokemonNames`**
+- [x] **Step 1: Écrire les tests unitaires pour la chaîne d'évolution inversée, les dexNumbers globaux et `unmatchedPokemonNames`**
 
 Dans `tests/usePokemonMatcher.test.js`, ajouter :
 
@@ -307,12 +307,12 @@ it('returns unique unmatchedPokemonNames when specimens have unknown forms', () 
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : FAIL en raison de l'absence de `reverseEvolutionPath` et `unmatchedPokemonNames`.
 
-- [ ] **Step 3: Implémenter la logique dans `src/composables/usePokemonMatcher.js`**
+- [x] **Step 3: Implémenter la logique dans `src/composables/usePokemonMatcher.js`**
 
 1. Ajouter une fonction helper `buildReverseEvolutionPath(speciesId, familyMap, customForms)` :
    - Parcourt les `parent` successifs dans `familyMap`.
@@ -328,12 +328,12 @@ Résultat attendu : FAIL en raison de l'absence de `reverseEvolutionPath` et `un
    - `reverseEvolutionPath = buildReverseEvolutionPath(speciesId, metadata?.familyMap, customForms);`
 4. Retourner `{ matched, unmatchedForms: Array.from(unmatchedFormsSet), unmatchedPokemonNames: Array.from(unmatchedPokemonSet) }`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/composables/usePokemonMatcher.js tests/usePokemonMatcher.test.js
@@ -354,7 +354,7 @@ git commit -m "feat(matcher): add reverse evolution paths, global dex numbers an
 - Consumes: `appStore.unmatchedPokemonNames`
 - Produces: encadré visuel dans la modale affichant : `Pokémon concernés : Deoxys, Necrozma`
 
-- [ ] **Step 1: Écrire le test unitaire pour `FormMappingEditor.vue`**
+- [x] **Step 1: Écrire le test unitaire pour `FormMappingEditor.vue`**
 
 Dans `tests/components/FormMappingEditor.test.js`, ajouter :
 
@@ -372,12 +372,12 @@ it('displays the list of affected Pokemon names in the modal', () => {
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/FormMappingEditor.test.js`  
 Résultat attendu : FAIL car `.affected-pokemon-box` n'existe pas encore.
 
-- [ ] **Step 3: Mettre à jour `appStore.js`, `pokemonStore.js` et `FormMappingEditor.vue`**
+- [x] **Step 3: Mettre à jour `appStore.js`, `pokemonStore.js` et `FormMappingEditor.vue`**
 
 1. Dans `src/stores/appStore.js` :
    - Ajouter `unmatchedPokemonNames: []` dans le state.
@@ -394,12 +394,12 @@ Résultat attendu : FAIL car `.affected-pokemon-box` n'existe pas encore.
      ```
    - Styliser `.affected-pokemon-box` avec un fond beige doux (`#FEF3C7`), bordure dorée (`#F59E0B`) et texte `#92400E`.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/FormMappingEditor.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/stores/appStore.js src/stores/pokemonStore.js src/components/FormMappingEditor.vue tests/components/FormMappingEditor.test.js
@@ -421,19 +421,19 @@ git commit -m "feat(ui): display affected pokemon names in FormMappingEditor mod
   - Suppression de `score-bar-bg` (la barre grise de progression)
   - Rendu de la chaîne d'évolution inverse pour un Pokémon non possédé : `<div class="reverse-evo-path">🌱 Florizarre ⇽ Herbizarre ⇽ Bulbizarre</div>`
 
-- [ ] **Step 1: Mettre à jour les tests unitaires dans `tests/components/PokemonRow.test.js`**
+- [x] **Step 1: Mettre à jour les tests unitaires dans `tests/components/PokemonRow.test.js`**
 
 Dans `tests/components/PokemonRow.test.js` :
 - Vérifier que `wrapper.text()` ne contient plus `'✅ Possédé'`.
 - Vérifier que `wrapper.find('.score-bar-bg').exists()` est `false`.
 - Tester un Pokémon non possédé avec `reverseEvolutionPath: 'Florizarre ⇽ Herbizarre ⇽ Bulbizarre'` et vérifier qu'il s'affiche dans `.reverse-evo-path`.
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/PokemonRow.test.js`  
 Résultat attendu : FAIL car l'ancien tag et la barre sont encore présents, et le chemin d'évolution n'est pas encore affiché.
 
-- [ ] **Step 3: Mettre à jour `src/components/PokemonRow.vue`**
+- [x] **Step 3: Mettre à jour `src/components/PokemonRow.vue`**
 
 1. Supprimer le bloc `.score-bar-bg` dans `.score-container`, conserver uniquement `<div class="score-badge">Score {{ item.meta.score }}</div>` (ou `<span class="score-num">{{ item.meta.score }}</span>`).
 2. Supprimer `<span class="owned-tag">✅ Possédé</span>` dans `.ownership-top`.
@@ -445,12 +445,12 @@ Résultat attendu : FAIL car l'ancien tag et la barre sont encore présents, et 
    ```
 4. Styliser `.reverse-evo-path` avec un style discret et élégant (texte `#2B6CB0`, fond pastel `#F0FDF4`, bordure fine `#BBF7D0`, taille de police `0.75rem`).
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/PokemonRow.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/PokemonRow.vue tests/components/PokemonRow.test.js
@@ -466,21 +466,21 @@ git commit -m "feat(ui): streamline PokemonRow by removing owned tag, removing g
 - Test: ensemble des suites de test (`npm test`)
 - Build: validation du bundle Vite (`npm run build`)
 
-- [ ] **Step 1: Mettre à jour le test d'intégration pour valider la chaîne d'évolution et les sprites locaux**
+- [x] **Step 1: Mettre à jour le test d'intégration pour valider la chaîne d'évolution et les sprites locaux**
 
 Dans `tests/integration.test.js`, vérifier que sur le jeu réel, les Pokémon de la méta reçoivent bien leurs `dexNumber` et `reverseEvolutionPath`.
 
-- [ ] **Step 2: Exécuter l'ensemble de la suite de tests**
+- [x] **Step 2: Exécuter l'ensemble de la suite de tests**
 
 Exécuter : `npm test`  
 Résultat attendu : Tous les tests passent à 100%.
 
-- [ ] **Step 3: Tester le build de production**
+- [x] **Step 3: Tester le build de production**
 
 Exécuter : `npm run build`  
 Résultat attendu : Build réussi avec tous les sprites packagés dans `dist/sprites/`.
 
-- [ ] **Step 4: Commiter et finaliser**
+- [x] **Step 4: Commiter et finaliser**
 
 ```bash
 git add tests/integration.test.js
