@@ -2,6 +2,7 @@
   "name": "pogo-team-creator",
   "version": "1.0.0",
   "description": "Cross-reference Pokémon GO PokeGenie exports with PvPoke rankings",
+  "author": "Quentin",
   "license": "MIT",
   "main": "electron/main.js",
   "scripts": {
@@ -10,7 +11,42 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron . --no-sandbox\""
+    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron . --no-sandbox\"",
+    "electron:pack": "vite build && electron-builder --dir",
+    "electron:build": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.quentinleveque.pogoteamcreator",
+    "productName": "PoGo Team Creator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "src/data/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.games"
+    }
   },
   "dependencies": {
     "pinia": "^2.1.7",
@@ -21,6 +57,7 @@
     "@vue/test-utils": "^2.4.5",
     "concurrently": "^8.2.2",
     "electron": "^31.0.0",
+    "electron-builder": "^26.15.3",
     "jsdom": "^24.0.0",
     "vite": "^5.2.0",
     "vitest": "^1.4.0",
