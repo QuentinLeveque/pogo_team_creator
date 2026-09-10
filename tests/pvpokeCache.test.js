@@ -7,7 +7,8 @@ import {
   getRankings,
   getEliteMovesMap,
   refreshAll,
-  translateMove
+  translateMove,
+  getGamemasterPokemonMetadata
 } from '../electron/services/pvpokeCache.js';
 
 describe('pvpokeCache', () => {
@@ -64,6 +65,31 @@ describe('pvpokeCache', () => {
     expect(eliteMap.charizard).toEqual(['BLAST_BURN', 'DRAGON_BREATH', 'EMBER', 'WING_ATTACK']);
     expect(eliteMap.venusaur).toEqual(['FRENZY_PLANT']);
     expect(eliteMap.pikachu).toEqual([]);
+  });
+
+  it('extracts speciesDexMap and familyMap from gamemaster correctly', async () => {
+    const fakeGameMaster = {
+      pokemon: [
+        { speciesId: 'venusaur', dex: 3, family: { id: 'FAMILY_BULBASAUR', parent: 'ivysaur' } },
+        { speciesId: 'ivysaur', dex: 2, family: { id: 'FAMILY_BULBASAUR', parent: 'bulbasaur' } },
+        { speciesId: 'bulbasaur', dex: 1, family: { id: 'FAMILY_BULBASAUR' } },
+        { speciesId: 'skarmory', dex: 227, family: { id: 'FAMILY_SKARMORY' } }
+      ]
+    };
+    const gmFile = path.join(tmpDir, 'cache', 'gamemaster.json');
+    const metaFile = path.join(tmpDir, 'cache', 'cache-meta.json');
+    fs.mkdirSync(path.join(tmpDir, 'cache'), { recursive: true });
+    fs.writeFileSync(gmFile, JSON.stringify(fakeGameMaster), 'utf-8');
+    fs.writeFileSync(metaFile, JSON.stringify({ gamemaster: new Date().toISOString() }), 'utf-8');
+
+    const { speciesDexMap, familyMap } = await getGamemasterPokemonMetadata();
+    expect(speciesDexMap.venusaur).toBe(3);
+    expect(speciesDexMap.bulbasaur).toBe(1);
+    expect(speciesDexMap.skarmory).toBe(227);
+
+    expect(familyMap.venusaur.parent).toBe('ivysaur');
+    expect(familyMap.bulbasaur.parent).toBeUndefined();
+    expect(familyMap.skarmory.parent).toBeUndefined();
   });
 });
 

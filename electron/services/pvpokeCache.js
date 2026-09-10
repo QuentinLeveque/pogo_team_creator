@@ -144,6 +144,33 @@ async function getEliteMovesMap(forceRefresh = false) {
   return map;
 }
 
+let gamemasterMetadataCache = null;
+
+async function getGamemasterPokemonMetadata(forceRefresh = false) {
+  if (gamemasterMetadataCache && !forceRefresh) {
+    return gamemasterMetadataCache;
+  }
+  const gm = await getGameMaster(forceRefresh);
+  const speciesDexMap = {};
+  const familyMap = {};
+
+  if (gm && Array.isArray(gm.pokemon)) {
+    for (const p of gm.pokemon) {
+      if (p.speciesId) {
+        if (p.dex) {
+          speciesDexMap[p.speciesId] = p.dex;
+        }
+        if (p.family) {
+          familyMap[p.speciesId] = p.family;
+        }
+      }
+    }
+  }
+
+  gamemasterMetadataCache = { speciesDexMap, familyMap };
+  return gamemasterMetadataCache;
+}
+
 async function refreshAll(leagues = ['1500', '2500', '10000', '500']) {
   const updatedLeagues = [];
   for (const league of leagues) {
@@ -152,6 +179,7 @@ async function refreshAll(leagues = ['1500', '2500', '10000', '500']) {
   }
   await getGameMaster(true);
   await getEliteMovesMap(true);
+  await getGamemasterPokemonMetadata(true);
   return {
     success: true,
     updatedLeagues,
@@ -164,6 +192,7 @@ module.exports = {
   getRankings,
   getGameMaster,
   getEliteMovesMap,
+  getGamemasterPokemonMetadata,
   refreshAll,
   translateMove,
   MOVE_TRANSLATIONS
