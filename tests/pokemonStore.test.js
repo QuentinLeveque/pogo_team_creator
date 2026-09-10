@@ -100,6 +100,11 @@ describe('pokemonStore', () => {
     await store.changeLeague('1500');
     expect(window.electronAPI.getRankings).not.toHaveBeenCalled();
     expect(store.rawMatched[0].meta.score).toBe(88);
+
+    // Returning to 2500 now restores from cachedMatchedByLeague instantly without recalculating
+    expect(store.cachedMatchedByLeague['2500']).toBeDefined();
+    await store.changeLeague('2500');
+    expect(store.rawMatched[0].meta.score).toBe(92);
   });
 
   it('fetches only the target league rankings if not in memory during changeLeague', async () => {

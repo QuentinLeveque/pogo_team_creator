@@ -20,6 +20,7 @@ export const usePokemonStore = defineStore('pokemon', {
     excludeXl: false,
     isRefreshingPvpoke: false,
     cachedRankings: {},
+    cachedMatchedByLeague: {},
     masterList: null,
     eliteMovesMap: null,
     pokemonMetadata: null
@@ -86,6 +87,13 @@ export const usePokemonStore = defineStore('pokemon', {
         this.pokemonMetadata || {}
       );
 
+      this.cachedMatchedByLeague[league] = {
+        matched,
+        unmatchedForms,
+        unmatchedPokemonNames,
+        unmatchedFormDetails
+      };
+
       this.rawMatched = matched;
       appStore.unmatchedForms = unmatchedForms;
       appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
@@ -96,6 +104,17 @@ export const usePokemonStore = defineStore('pokemon', {
       const appStore = useAppStore();
       if (appStore.activeLeague === leagueId && this.rawMatched.length > 0) return;
       appStore.setLeague(leagueId);
+
+      // If this league was already calculated in this session, restore immediately (0ms!)
+      if (this.cachedMatchedByLeague[leagueId]) {
+        const cached = this.cachedMatchedByLeague[leagueId];
+        this.rawMatched = cached.matched;
+        appStore.unmatchedForms = cached.unmatchedForms;
+        appStore.unmatchedPokemonNames = cached.unmatchedPokemonNames;
+        appStore.unmatchedFormDetails = cached.unmatchedFormDetails;
+        this.isLoading = false;
+        return;
+      }
 
       // If base data not yet loaded, perform full loadData
       if (!this.masterList || !this.pokemonMetadata) {
@@ -143,6 +162,7 @@ export const usePokemonStore = defineStore('pokemon', {
         this.eliteMovesMap = eliteMovesMap || {};
         this.pokemonMetadata = pokemonMetadata || {};
         this.cachedRankings[appStore.activeLeague] = rankingsRes;
+        this.cachedMatchedByLeague = {};
 
         appStore.customForms = forms || {};
         appStore.importHistory = history || [];
@@ -168,6 +188,7 @@ export const usePokemonStore = defineStore('pokemon', {
           appStore.showToast('Classements PvPoke actualisés avec succès.');
         }
         this.cachedRankings = {};
+        this.cachedMatchedByLeague = {};
         await this.loadData();
       } catch (err) {
         this.error = err.message || 'Erreur lors du rafraîchissement PvPoke';
