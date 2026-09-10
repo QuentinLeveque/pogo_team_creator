@@ -451,10 +451,12 @@ describe('usePokemonMatcher', () => {
     expect(shadowMatch.mine.ivRankPercent).toBe(95.0);
 
     // Evolution line check for shadow
+    expect(shadowMatch.meta.nameFr).toBe('Feunard');
     expect(shadowMatch.evolutionLine).toBeDefined();
     expect(shadowMatch.evolutionLine.length).toBe(2);
     expect(shadowMatch.evolutionLine[0].isShadow).toBe(true);
-    expect(shadowMatch.evolutionLine[0].frenchName).toContain('Obscur');
+    expect(shadowMatch.evolutionLine[0].frenchName).toBe('Goupix');
+    expect(shadowMatch.evolutionLine[0].nameFr).toBe('Goupix');
     expect(shadowMatch.evolutionLine[0].isOwned).toBe(true);
 
     // Check mineMoves with isElite

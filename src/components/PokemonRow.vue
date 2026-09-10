@@ -21,7 +21,7 @@
           <span v-if="item.mine?.needsEvolution" class="evo-badge">Évolution requise</span>
         </div>
         <div v-if="item.mine?.betterUnevolvedCandidate" class="better-unevolved-notice">
-          💡 Non-évolué disponible : {{ item.mine.betterUnevolvedCandidate.name }} (Rang {{ item.mine.betterUnevolvedCandidate.ivRankPercent?.toFixed(1) }}%)
+          💡 Non-évolué disponible : {{ item.mine.betterUnevolvedCandidate.name }}<template v-if="item.mine.betterUnevolvedCandidate.isShadow"> <span class="shadow-badge">Obscur</span></template> (Rang {{ item.mine.betterUnevolvedCandidate.ivRankPercent?.toFixed(1) }}%)
         </div>
         <div class="types-line">
           <span
@@ -85,6 +85,7 @@
               <div class="stage-info">
                 <div class="stage-name-line">
                   <span class="stage-name">{{ stage.nameFr }}</span>
+                  <span v-if="stage.isShadow" class="shadow-badge">Obscur</span>
                   <span v-if="stage.isTarget" class="badge-target">🎯 Cible</span>
                 </div>
                 <span v-if="stage.isOwned && stage.ownedCandidate" class="badge-owned">
@@ -109,7 +110,10 @@
             <div class="comp-header">
               <span class="comp-badge active">Actuel (Prêt à jouer)</span>
             </div>
-            <div class="comp-name">{{ item.mine.name }}</div>
+            <div class="comp-name">
+              {{ item.mine.name }}
+              <span v-if="item.mine.isShadow" class="shadow-badge">Obscur</span>
+            </div>
             <div class="comp-metric">
               Rang : <strong>{{ item.mine.ivRankPercent ? `${item.mine.ivRankPercent.toFixed(1)}% #${item.mine.ivRankNumber}` : `${item.mine.ivAverage.toFixed(1)}%` }}</strong>
             </div>
@@ -123,7 +127,10 @@
             <div class="comp-header">
               <span class="comp-badge potential">Potentiel supérieur</span>
             </div>
-            <div class="comp-name">{{ item.mine.betterUnevolvedCandidate.name }}</div>
+            <div class="comp-name">
+              {{ item.mine.betterUnevolvedCandidate.name }}
+              <span v-if="item.mine.betterUnevolvedCandidate.isShadow" class="shadow-badge">Obscur</span>
+            </div>
             <div class="comp-metric">
               Rang supérieur : <strong>{{ item.mine.betterUnevolvedCandidate.ivRankPercent?.toFixed(1) }}% #{{ item.mine.betterUnevolvedCandidate.ivRankNumber }}</strong>
             </div>
@@ -213,6 +220,7 @@
                 <div v-for="m in item.meta.matchups" :key="m.opponent" class="matchup-chip win">
                   <PokemonSprite :dex-number="m.dexNumber" :alt="m.opponentNameFr" class="chip-sprite" />
                   <span class="chip-name">{{ m.opponentNameFr }}</span>
+                  <span v-if="m.isShadow" class="chip-shadow-badge">Obscur</span>
                   <span v-if="m.rating" class="chip-rating">{{ m.rating }}</span>
                 </div>
               </div>
@@ -225,6 +233,7 @@
                 <div v-for="c in item.meta.counters" :key="c.opponent" class="matchup-chip loss">
                   <PokemonSprite :dex-number="c.dexNumber" :alt="c.opponentNameFr" class="chip-sprite" />
                   <span class="chip-name">{{ c.opponentNameFr }}</span>
+                  <span v-if="c.isShadow" class="chip-shadow-badge">Obscur</span>
                   <span v-if="c.rating" class="chip-rating">{{ c.rating }}</span>
                 </div>
               </div>

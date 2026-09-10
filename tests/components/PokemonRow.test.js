@@ -19,7 +19,7 @@ describe('PokemonRow.vue', () => {
         ]
       },
       matchups: [{ opponent: 'tinkaton', opponentNameFr: 'Tinkaton', dexNumber: 959, rating: 650 }],
-      counters: [{ opponent: 'quagsire_shadow', opponentNameFr: 'Maraiste (Obs)', dexNumber: 195, rating: 350 }]
+      counters: [{ opponent: 'quagsire_shadow', opponentNameFr: 'Maraiste', isShadow: true, dexNumber: 195, rating: 350 }]
     },
     mine: {
       dexNumber: 6,
@@ -188,7 +188,7 @@ describe('PokemonRow.vue', () => {
       meta: {
         speciesId: 'ninetales_shadow',
         dexNumber: 38,
-        nameFr: 'Feunard (Obscur)',
+        nameFr: 'Feunard',
         score: 95,
         rank: 2,
         isShadow: true,
@@ -223,7 +223,12 @@ describe('PokemonRow.vue', () => {
     expect(wrapper.text()).toContain('Victoires clés');
     expect(wrapper.text()).toContain('Contres clés');
     expect(wrapper.text()).toContain('Tinkaton');
-    expect(wrapper.text()).toContain('Maraiste (Obs)');
+    expect(wrapper.text()).toContain('Maraiste');
+    expect(wrapper.text()).not.toContain('(Obs)');
+    expect(wrapper.text()).not.toContain('(Obscur)');
+    const chipShadowBadge = wrapper.find('.chip-shadow-badge');
+    expect(chipShadowBadge.exists()).toBe(true);
+    expect(chipShadowBadge.text()).toBe('Obscur');
     expect(wrapper.text()).toContain('650');
     expect(wrapper.text()).toContain('350');
   });
@@ -422,4 +427,91 @@ describe('PokemonRow.vue', () => {
     expect(stages2[1].text()).toContain('Cible');
     expect(stages2[1].text()).toContain('Non possédé');
   });
+
+  it('renders dedicated purple Obscur badges and no (Obscur) text in header, stages, comparisons, and matchups', async () => {
+    const shadowItem = {
+      meta: {
+        speciesId: 'ninetales_shadow',
+        dexNumber: 38,
+        nameFr: 'Feunard',
+        score: 94,
+        rank: 5,
+        isShadow: true,
+        types: ['Feu'],
+        reverseEvolutionPath: 'Feunard ⇽ Goupix',
+        evolutionLine: [
+          {
+            speciesId: 'vulpix_shadow',
+            dexNumber: 37,
+            nameFr: 'Goupix',
+            isTarget: false,
+            isShadow: true,
+            isOwned: true,
+            ownedCandidate: { name: 'Goupix', ivRankPercent: 99.1, ivRankNumber: 20 }
+          },
+          {
+            speciesId: 'ninetales_shadow',
+            dexNumber: 38,
+            nameFr: 'Feunard',
+            isTarget: true,
+            isShadow: true,
+            isOwned: true,
+            ownedCandidate: { name: 'Feunard', ivRankPercent: 91.0, ivRankNumber: 350 }
+          }
+        ],
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [{ opponent: 'tinkaton', opponentNameFr: 'Tinkaton', dexNumber: 959, rating: 650, isShadow: false }],
+        counters: [{ opponent: 'quagsire_shadow', opponentNameFr: 'Maraiste', dexNumber: 195, rating: 350, isShadow: true }]
+      },
+      mine: {
+        dexNumber: 38,
+        name: 'Feunard',
+        isShadow: true,
+        ivRankPercent: 91.0,
+        ivRankNumber: 350,
+        betterUnevolvedCandidate: {
+          name: 'Goupix',
+          isShadow: true,
+          ivRankPercent: 99.1,
+          ivRankNumber: 20
+        }
+      }
+    };
+
+    const wrapper = mount(PokemonRow, {
+      props: { item: shadowItem }
+    });
+
+    // In unexpanded view:
+    // Header has Obscur badge
+    expect(wrapper.find('.row-header .shadow-badge').text()).toBe('Obscur');
+    // Better unevolved notice has Obscur badge
+    expect(wrapper.find('.better-unevolved-notice .shadow-badge').text()).toBe('Obscur');
+    // No parenthetical (Obscur) or (Obs) in text
+    expect(wrapper.text()).not.toContain('(Obscur)');
+    expect(wrapper.text()).not.toContain('(Obs)');
+
+    // Expand card
+    await wrapper.find('.row-header').trigger('click');
+
+    // Evolution chain stages have badges
+    const stageBadges = wrapper.findAll('.evolution-chain-section .shadow-badge');
+    expect(stageBadges.length).toBe(2);
+    expect(stageBadges[0].text()).toBe('Obscur');
+    expect(stageBadges[1].text()).toBe('Obscur');
+
+    // Comparison cards have badges
+    const compBadges = wrapper.findAll('.comparison-section .shadow-badge');
+    expect(compBadges.length).toBe(2);
+
+    // Matchup chips: counter chip has chip-shadow-badge
+    const chipBadges = wrapper.findAll('.chip-shadow-badge');
+    expect(chipBadges.length).toBe(1);
+    expect(chipBadges[0].text()).toBe('Obscur');
+
+    // Verify completely free of (Obscur) and (Obs)
+    expect(wrapper.text()).not.toContain('(Obscur)');
+    expect(wrapper.text()).not.toContain('(Obs)');
+  });
 });
+

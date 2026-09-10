@@ -49,8 +49,7 @@ function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
   const allIds = [speciesId, ...chain];
   const frenchNames = allIds.map(id => {
     const info = speciesIdToFrench(cleanId(id), customForms);
-    const baseFr = info.frenchName || id;
-    return isTargetShadow ? `${baseFr} (Obscur)` : baseFr;
+    return info.frenchName || id;
   });
 
   return frenchNames.join(' ⇽ ');
@@ -80,10 +79,7 @@ function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ow
     const isStageShadow = isTargetShadow || stageId.endsWith('_shadow');
     const stageLookupId = isStageShadow && !cleanStageId.endsWith('_shadow') ? `${cleanStageId}_shadow` : cleanStageId;
     const dexNumber = (speciesDexMap && (speciesDexMap[stageId] || speciesDexMap[cleanStageId])) || 0;
-    let { frenchName } = speciesIdToFrench(cleanStageId, customForms);
-    if (isStageShadow) {
-      frenchName = `${frenchName} (Obscur)`;
-    }
+    const { frenchName } = speciesIdToFrench(cleanStageId, customForms);
     const isTarget = stageId === speciesId;
 
     const ownedList = ownedByCurrentSpecies ? (ownedByCurrentSpecies.get(stageLookupId) || []) : [];
@@ -383,7 +379,8 @@ function moveMatches(specimenMoves, targetNameFr) {
       const oppDex = speciesDexMap[m.opponent] || speciesDexMap[cleanOpponentId] || 0;
       return {
         opponent: m.opponent,
-        opponentNameFr: info.frenchName + (info.isShadow ? ' (Obs)' : ''),
+        opponentNameFr: info.frenchName,
+        isShadow: Boolean(info.isShadow),
         rating: m.rating,
         dexNumber: oppDex
       };
@@ -395,7 +392,8 @@ function moveMatches(specimenMoves, targetNameFr) {
       const oppDex = speciesDexMap[c.opponent] || speciesDexMap[cleanOpponentId] || 0;
       return {
         opponent: c.opponent,
-        opponentNameFr: info.frenchName + (info.isShadow ? ' (Obs)' : ''),
+        opponentNameFr: info.frenchName,
+        isShadow: Boolean(info.isShadow),
         rating: c.rating,
         dexNumber: oppDex
       };
@@ -417,7 +415,7 @@ function moveMatches(specimenMoves, targetNameFr) {
         reverseEvolutionPath,
         evolutionLine,
         speciesName: ranking.speciesName,
-        nameFr: isTargetShadow ? `${frenchName} (Obscur)` : frenchName,
+        nameFr: frenchName,
         score: ranking.score,
         rank: index + 1,
         types: ranking.types || [],
