@@ -59,7 +59,8 @@ function getForms() {
   const formsPath = path.join(currentDir, 'forms.json');
   try {
     if (fs.existsSync(formsPath)) {
-      return JSON.parse(fs.readFileSync(formsPath, 'utf-8'));
+      const custom = JSON.parse(fs.readFileSync(formsPath, 'utf-8'));
+      return { ...defaultFormsData, ...custom };
     }
   } catch (err) {
     console.error('Failed to read forms.json:', err);

@@ -57,4 +57,18 @@ describe('nameTranslator', () => {
     expect(result.unmatchedForm).toBeNull();
     expect(result.id).toBe('pikachu');
   });
+
+  it('matches forms case-insensitively and accent-insensitively', () => {
+    const resMega = toSpeciesId('Rayquaza', 'Mega', false);
+    expect(resMega).toEqual({ id: 'rayquaza_mega', unmatched: false, unmatchedForm: null });
+
+    const resMegaAccented = toSpeciesId('Rayquaza', 'Méga', false);
+    expect(resMegaAccented).toEqual({ id: 'rayquaza_mega', unmatched: false, unmatchedForm: null });
+
+    const resBuyo = toSpeciesId('Plumeline', 'Buyo', false);
+    expect(resBuyo).toEqual({ id: 'oricorio_sensu', unmatched: false, unmatchedForm: null });
+
+    const resPomPom = toSpeciesId('Plumeline', 'Pom Pom', false);
+    expect(resPomPom).toEqual({ id: 'oricorio_pom_pom', unmatched: false, unmatchedForm: null });
+  });
 });

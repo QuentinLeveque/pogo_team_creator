@@ -7,6 +7,15 @@ function normalizeName(str) {
   return str.trim().toLowerCase();
 }
 
+function normalizeFormKey(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}) {
   if (!frenchName) {
     return { id: '', unmatched: false, unmatchedForm: null };
@@ -29,8 +38,19 @@ export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}
 
   if (form && form.trim() !== '' && form.trim() !== 'Normale') {
     const trimmedForm = form.trim();
-    if (combinedForms[trimmedForm] !== undefined) {
-      const suffix = combinedForms[trimmedForm];
+    let suffix = combinedForms[trimmedForm];
+
+    if (suffix === undefined) {
+      const normForm = normalizeFormKey(trimmedForm);
+      for (const [k, v] of Object.entries(combinedForms)) {
+        if (normalizeFormKey(k) === normForm) {
+          suffix = v;
+          break;
+        }
+      }
+    }
+
+    if (suffix !== undefined) {
       if (suffix && suffix.trim() !== '') {
         id += `_${suffix.trim().toLowerCase()}`;
       }
