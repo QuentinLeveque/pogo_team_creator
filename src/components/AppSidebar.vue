@@ -168,8 +168,7 @@ const leagues = [
 ];
 
 async function selectLeague(id) {
-  appStore.setLeague(id);
-  await pokemonStore.loadData();
+  await pokemonStore.changeLeague(id);
 }
 
 async function exportMerged() {

@@ -65,14 +65,12 @@ async function getRankings(league, forceRefresh = false) {
   const meta = getCacheMeta();
   const cachedAt = meta[`rankings-${league}`];
 
-  const isCacheValid = cachedAt && (Date.now() - new Date(cachedAt).getTime() < 24 * 60 * 60 * 1000);
-
-  if (filePath && fs.existsSync(filePath) && isCacheValid && !forceRefresh) {
+  if (filePath && fs.existsSync(filePath) && !forceRefresh) {
     try {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      return { data, fromCache: true, cachedAt };
+      return { data, fromCache: true, cachedAt: cachedAt || new Date().toISOString() };
     } catch (e) {
-      // Fallback to fetch
+      // Fallback to fetch if parse fails
     }
   }
 
@@ -104,10 +102,13 @@ async function getGameMaster(forceRefresh = false) {
   const filePath = cacheDir ? path.join(cacheDir, 'gamemaster.json') : null;
   const meta = getCacheMeta();
   const cachedAt = meta.gamemaster;
-  const isCacheValid = cachedAt && (Date.now() - new Date(cachedAt).getTime() < 7 * 24 * 60 * 60 * 1000);
 
-  if (filePath && fs.existsSync(filePath) && isCacheValid && !forceRefresh) {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  if (filePath && fs.existsSync(filePath) && !forceRefresh) {
+    try {
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    } catch (e) {
+      // Fallback to fetch
+    }
   }
 
   try {

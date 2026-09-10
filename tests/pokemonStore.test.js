@@ -76,5 +76,50 @@ describe('pokemonStore', () => {
     expect(store.displayedPokemon.length).toBe(1);
     expect(store.displayedPokemon[0].meta.nameFr).toBe('Laggron');
   });
+
+  it('switches league quickly using cached rankings without refetching', async () => {
+    const store = usePokemonStore();
+    store.masterList = [{ Nom: 'Dracaufeu', Forme: '', 'Rang % (G)': '95%', 'Rang # (G)': '12', 'Coût Poussières (G)': '10000', 'Coût Bonbon (G)': '10' }];
+    store.pokemonMetadata = { speciesDexMap: { charizard: 6 } };
+    store.eliteMovesMap = {};
+    store.cachedRankings = {
+      '1500': { data: [{ speciesId: 'charizard', score: 88 }] },
+      '2500': { data: [{ speciesId: 'charizard', score: 92 }] }
+    };
+
+    window.electronAPI = {
+      getRankings: vi.fn()
+    };
+
+    await store.changeLeague('2500');
+    expect(window.electronAPI.getRankings).not.toHaveBeenCalled();
+    expect(store.rawMatched.length).toBe(1);
+    expect(store.rawMatched[0].meta.score).toBe(92);
+
+    // Switching to 1500 uses cache directly
+    await store.changeLeague('1500');
+    expect(window.electronAPI.getRankings).not.toHaveBeenCalled();
+    expect(store.rawMatched[0].meta.score).toBe(88);
+  });
+
+  it('fetches only the target league rankings if not in memory during changeLeague', async () => {
+    const store = usePokemonStore();
+    store.masterList = [{ Nom: 'Dracaufeu', Forme: '', 'Rang % (U)': '98%', 'Rang # (U)': '5' }];
+    store.pokemonMetadata = { speciesDexMap: { charizard: 6 } };
+    store.eliteMovesMap = {};
+    store.cachedRankings = {
+      '1500': { data: [{ speciesId: 'charizard', score: 88 }] }
+    };
+
+    window.electronAPI = {
+      getRankings: vi.fn().mockResolvedValue({ data: [{ speciesId: 'charizard', score: 95 }] })
+    };
+
+    await store.changeLeague('2500');
+    expect(window.electronAPI.getRankings).toHaveBeenCalledWith('2500');
+    expect(store.cachedRankings['2500']).toBeDefined();
+    expect(store.rawMatched[0].meta.score).toBe(95);
+  });
 });
+
 

@@ -1,4 +1,4 @@
-import { toSpeciesId, speciesIdToFrench } from '../../electron/services/nameTranslator.js';
+import { toSpeciesId, speciesIdToFrench } from '../services/nameTranslator.js';
 import { translateMove } from '../data/moves.js';
 import { calculateResourceCosts } from '../utils/costCalculator.js';
 import frNames from '../data/fr.json';

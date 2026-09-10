@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toSpeciesId, speciesIdToFrench } from '../electron/services/nameTranslator.js';
+import { toSpeciesId, speciesIdToFrench } from '../src/services/nameTranslator.js';
 
 describe('nameTranslator', () => {
   it('translates standard Pokemon without form', () => {

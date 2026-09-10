@@ -1,6 +1,6 @@
-import frNames from '../../src/data/fr.json';
-import enNames from '../../src/data/en.json';
-import defaultForms from '../../src/data/forms.json';
+import frNames from '../data/fr.json';
+import enNames from '../data/en.json';
+import defaultForms from '../data/forms.json';
 
 function normalizeName(str) {
   if (!str) return '';

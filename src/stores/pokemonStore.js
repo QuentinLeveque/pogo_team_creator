@@ -18,7 +18,11 @@ export const usePokemonStore = defineStore('pokemon', {
     sortOption: 'score',
     activeView: 'my-pokemon',
     excludeXl: false,
-    isRefreshingPvpoke: false
+    isRefreshingPvpoke: false,
+    cachedRankings: {},
+    masterList: null,
+    eliteMovesMap: null,
+    pokemonMetadata: null
   }),
   getters: {
     displayedPokemon(state) {
@@ -68,6 +72,57 @@ export const usePokemonStore = defineStore('pokemon', {
     }
   },
   actions: {
+    runMatching(league) {
+      const appStore = useAppStore();
+      const rankingObj = this.cachedRankings[league];
+      if (!rankingObj || !this.masterList) return;
+
+      const { matched, unmatchedForms, unmatchedPokemonNames, unmatchedFormDetails } = matchPokemon(
+        this.masterList || [],
+        rankingObj.data || [],
+        league,
+        appStore.customForms || {},
+        this.eliteMovesMap || {},
+        this.pokemonMetadata || {}
+      );
+
+      this.rawMatched = matched;
+      appStore.unmatchedForms = unmatchedForms;
+      appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
+      appStore.unmatchedFormDetails = unmatchedFormDetails || [];
+    },
+
+    async changeLeague(leagueId) {
+      const appStore = useAppStore();
+      appStore.setLeague(leagueId);
+
+      // If base data not yet loaded, perform full loadData
+      if (!this.masterList || !this.pokemonMetadata) {
+        return await this.loadData();
+      }
+
+      // If rankings for this league are already in memory, match instantly!
+      if (this.cachedRankings[leagueId]) {
+        this.runMatching(leagueId);
+        return;
+      }
+
+      // Otherwise fetch only the rankings for this league
+      this.isLoading = true;
+      this.error = null;
+      try {
+        if (typeof window !== 'undefined' && window.electronAPI?.getRankings) {
+          const rankingsRes = await window.electronAPI.getRankings(leagueId);
+          this.cachedRankings[leagueId] = rankingsRes;
+          this.runMatching(leagueId);
+        }
+      } catch (err) {
+        this.error = err.message || 'Erreur de chargement des classements';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async loadData() {
       const appStore = useAppStore();
       this.isLoading = true;
@@ -85,24 +140,17 @@ export const usePokemonStore = defineStore('pokemon', {
           window.electronAPI.getPokemonMetadata ? window.electronAPI.getPokemonMetadata() : null
         ]);
 
+        this.masterList = master || [];
+        this.eliteMovesMap = eliteMovesMap || {};
+        this.pokemonMetadata = pokemonMetadata || {};
+        this.cachedRankings[appStore.activeLeague] = rankingsRes;
+
         appStore.customForms = forms || {};
         appStore.importHistory = history || [];
 
-        const { matched, unmatchedForms, unmatchedPokemonNames, unmatchedFormDetails } = matchPokemon(
-          master || [],
-          rankingsRes.data || [],
-          appStore.activeLeague,
-          appStore.customForms,
-          eliteMovesMap || {},
-          pokemonMetadata || {}
-        );
+        this.runMatching(appStore.activeLeague);
 
-        this.rawMatched = matched;
-        appStore.unmatchedForms = unmatchedForms;
-        appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
-        appStore.unmatchedFormDetails = unmatchedFormDetails || [];
-
-        if (rankingsRes.fromCache && rankingsRes.cachedAt) {
+        if (rankingsRes && rankingsRes.fromCache && rankingsRes.cachedAt) {
           appStore.showToast(`Données PvPoke en cache (mise à jour: ${new Date(rankingsRes.cachedAt).toLocaleDateString('fr-FR')})`);
         }
       } catch (err) {
@@ -120,6 +168,7 @@ export const usePokemonStore = defineStore('pokemon', {
           await window.electronAPI.refreshPvpoke();
           appStore.showToast('Classements PvPoke actualisés avec succès.');
         }
+        this.cachedRankings = {};
         await this.loadData();
       } catch (err) {
         this.error = err.message || 'Erreur lors du rafraîchissement PvPoke';

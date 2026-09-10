@@ -49,6 +49,18 @@ describe('AppSidebar.vue', () => {
     expect(pokemonStore.refreshPvpoke).toHaveBeenCalled();
   });
 
+  it('calls pokemonStore.changeLeague when clicking a league button', async () => {
+    const pokemonStore = usePokemonStore();
+    pokemonStore.changeLeague = vi.fn().mockResolvedValue();
+
+    const wrapper = mount(AppSidebar);
+    const leagueButtons = wrapper.findAll('.league-btn');
+    expect(leagueButtons.length).toBe(4);
+
+    await leagueButtons[1].trigger('click');
+    expect(pokemonStore.changeLeague).toHaveBeenCalledWith('2500');
+  });
+
   it('shows confirmation modal before deleting an individual CSV file and calls removeCsvFile on confirm', async () => {
     const appStore = useAppStore();
     const pokemonStore = usePokemonStore();
