@@ -31,8 +31,8 @@ export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}
     const trimmedForm = form.trim();
     if (combinedForms[trimmedForm] !== undefined) {
       const suffix = combinedForms[trimmedForm];
-      if (suffix) {
-        id += `_${suffix}`;
+      if (suffix && suffix.trim() !== '') {
+        id += `_${suffix.trim().toLowerCase()}`;
       }
     } else {
       unmatched = true;

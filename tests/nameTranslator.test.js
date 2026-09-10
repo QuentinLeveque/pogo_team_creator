@@ -47,4 +47,14 @@ describe('nameTranslator', () => {
     expect(res.frenchName.toLowerCase()).toBe('dracaufeu');
     expect(res.isShadow).toBe(true);
   });
+
+  it('treats an empty string customForm as an explicit standard base form mapping', () => {
+    const result = toSpeciesId('Pikachu', "Costume d'Halloween", false, {
+      "Costume d'Halloween": ''
+    });
+
+    expect(result.unmatched).toBe(false);
+    expect(result.unmatchedForm).toBeNull();
+    expect(result.id).toBe('pikachu');
+  });
 });
