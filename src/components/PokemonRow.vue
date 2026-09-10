@@ -4,12 +4,6 @@
       <div class="rank-badge">#{{ item.meta.rank }}</div>
 
       <div class="score-container">
-        <div class="score-bar-bg">
-          <div
-            class="score-bar-fill"
-            :style="{ width: `${item.meta.score}%`, backgroundColor: primaryTypeColor }"
-          ></div>
-        </div>
         <span class="score-num">{{ item.meta.score }}</span>
       </div>
 
@@ -39,12 +33,14 @@
             {{ t }}
           </span>
         </div>
+        <div v-if="!item.mine && item.meta.reverseEvolutionPath" class="reverse-evo-path">
+          🌱 {{ item.meta.reverseEvolutionPath }}
+        </div>
       </div>
 
       <div class="ownership-summary">
         <template v-if="item.mine">
           <div class="ownership-top">
-            <span class="owned-tag">✅ Possédé</span>
             <span v-if="item.mine.ivRankPercent" class="rank-tag">
               Rang: {{ item.mine.ivRankPercent.toFixed(1) }}%
               <span v-if="item.mine.ivRankNumber" class="rank-num">#{{ item.mine.ivRankNumber }}</span>
@@ -230,25 +226,17 @@ function getTypeColor(t) {
 .score-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  width: 90px;
+  justify-content: center;
+  width: 44px;
   flex-shrink: 0;
-}
-.score-bar-bg {
-  flex: 1;
-  height: 6px;
-  background: #EDF2F7;
-  border-radius: 3px;
-  overflow: hidden;
-}
-.score-bar-fill {
-  height: 100%;
-  border-radius: 3px;
 }
 .score-num {
   font-size: 0.85rem;
   font-weight: 700;
   color: #2D3748;
+  background: #F1F5F9;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
 }
 .name-info {
   flex: 1;
@@ -330,10 +318,16 @@ function getTypeColor(t) {
   align-items: center;
   gap: 0.5rem;
 }
-.owned-tag {
+.reverse-evo-path {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #2F855A;
+  color: #1E40AF;
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  margin-top: 0.25rem;
+  display: inline-block;
+  font-weight: 500;
 }
 .not-owned-tag {
   font-size: 0.75rem;

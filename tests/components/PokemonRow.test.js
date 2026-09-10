@@ -60,7 +60,8 @@ describe('PokemonRow.vue', () => {
     expect(wrapper.text()).toContain('Dracaufeu');
     expect(wrapper.text()).toContain('#12');
     expect(wrapper.text()).toContain('88');
-    expect(wrapper.text()).toContain('Possédé');
+    expect(wrapper.text()).not.toContain('Possédé');
+    expect(wrapper.find('.score-bar-bg').exists()).toBe(false);
     // Correct label: Rang: 98.7% #56
     expect(wrapper.text()).toContain('Rang: 98.7%');
     expect(wrapper.text()).toContain('#56');
@@ -71,6 +72,33 @@ describe('PokemonRow.vue', () => {
     expect(wrapper.text()).toContain('Non-évolué disponible : Salamèche (Rang 99.8%)');
     // Sprite rendered
     expect(wrapper.findComponent({ name: 'PokemonSprite' }).exists()).toBe(true);
+  });
+
+  it('displays reverse evolution path on unowned pokemon and does not render owned tag or score bar', () => {
+    const unownedItem = {
+      meta: {
+        speciesId: 'venusaur',
+        dexNumber: 3,
+        nameFr: 'Florizarre',
+        score: 92,
+        rank: 5,
+        types: ['Plante', 'Poison'],
+        reverseEvolutionPath: 'Florizarre ⇽ Herbizarre ⇽ Bulbizarre',
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [],
+        counters: []
+      },
+      mine: null
+    };
+
+    const wrapper = mount(PokemonRow, {
+      props: { item: unownedItem }
+    });
+
+    expect(wrapper.text()).not.toContain('Possédé');
+    expect(wrapper.find('.score-bar-bg').exists()).toBe(false);
+    expect(wrapper.find('.reverse-evo-path').exists()).toBe(true);
+    expect(wrapper.find('.reverse-evo-path').text()).toContain('Florizarre ⇽ Herbizarre ⇽ Bulbizarre');
   });
 
   it('displays form badge and evolution badge when applicable', () => {
