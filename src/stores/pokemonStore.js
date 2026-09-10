@@ -73,12 +73,12 @@ export const usePokemonStore = defineStore('pokemon', {
     }
   },
   actions: {
-    runMatching(league) {
+    computeMatchForLeague(league) {
       const appStore = useAppStore();
       const rankingObj = this.cachedRankings[league];
-      if (!rankingObj || !this.masterList) return;
+      if (!rankingObj || !this.masterList) return null;
 
-      const { matched, unmatchedForms, unmatchedPokemonNames, unmatchedFormDetails } = matchPokemon(
+      const result = matchPokemon(
         this.masterList || [],
         rankingObj.data || [],
         league,
@@ -87,17 +87,49 @@ export const usePokemonStore = defineStore('pokemon', {
         this.pokemonMetadata || {}
       );
 
-      this.cachedMatchedByLeague[league] = {
-        matched,
-        unmatchedForms,
-        unmatchedPokemonNames,
-        unmatchedFormDetails
-      };
+      this.cachedMatchedByLeague[league] = result;
+      return result;
+    },
 
-      this.rawMatched = matched;
-      appStore.unmatchedForms = unmatchedForms;
-      appStore.unmatchedPokemonNames = unmatchedPokemonNames || [];
-      appStore.unmatchedFormDetails = unmatchedFormDetails || [];
+    runMatching(league) {
+      const appStore = useAppStore();
+      let result = this.cachedMatchedByLeague[league];
+      if (!result) {
+        result = this.computeMatchForLeague(league);
+      }
+      if (!result) return;
+
+      this.rawMatched = result.matched;
+      appStore.unmatchedForms = result.unmatchedForms;
+      appStore.unmatchedPokemonNames = result.unmatchedPokemonNames || [];
+      appStore.unmatchedFormDetails = result.unmatchedFormDetails || [];
+    },
+
+    async preloadOtherLeagues() {
+      const allLeagues = ['1500', '2500', '10000', '500'];
+      if (!this.masterList || !this.pokemonMetadata) return;
+
+      for (const leagueId of allLeagues) {
+        // Yield to event loop between leagues to keep UI buttery smooth
+        await new Promise(resolve => setTimeout(resolve, 60));
+
+        // Skip if already computed
+        if (this.cachedMatchedByLeague[leagueId]) continue;
+
+        try {
+          if (!this.cachedRankings[leagueId]) {
+            if (typeof window !== 'undefined' && window.electronAPI?.getRankings) {
+              const rankingsRes = await window.electronAPI.getRankings(leagueId);
+              this.cachedRankings[leagueId] = rankingsRes;
+            }
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 30));
+          this.computeMatchForLeague(leagueId);
+        } catch (err) {
+          console.warn(`[preloadOtherLeagues] Failed to preload league ${leagueId}:`, err);
+        }
+      }
     },
 
     async changeLeague(leagueId) {
@@ -105,7 +137,7 @@ export const usePokemonStore = defineStore('pokemon', {
       if (appStore.activeLeague === leagueId && this.rawMatched.length > 0) return;
       appStore.setLeague(leagueId);
 
-      // If this league was already calculated in this session, restore immediately (0ms!)
+      // If this league was already calculated in this session (or preloaded in background!), restore immediately (0ms!)
       if (this.cachedMatchedByLeague[leagueId]) {
         const cached = this.cachedMatchedByLeague[leagueId];
         this.rawMatched = cached.matched;
@@ -176,6 +208,10 @@ export const usePokemonStore = defineStore('pokemon', {
         this.error = err.message || 'Erreur de chargement des données';
       } finally {
         this.isLoading = false;
+        // Pre-charge remaining leagues in background during idle time
+        setTimeout(() => {
+          this.preloadOtherLeagues();
+        }, 150);
       }
     },
 

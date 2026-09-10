@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { usePokemonStore } from '../src/stores/pokemonStore.js';
 
@@ -123,6 +123,40 @@ describe('pokemonStore', () => {
     await store.changeLeague('2500');
     expect(window.electronAPI.getRankings).toHaveBeenCalledWith('2500');
     expect(store.cachedRankings['2500']).toBeDefined();
+    expect(store.rawMatched[0].meta.score).toBe(95);
+  });
+
+  it('preloads all other leagues in background without changing active league view', async () => {
+    const store = usePokemonStore();
+    store.masterList = [{ Nom: 'Dracaufeu', Forme: '', 'Rang % (G)': '95%', 'Rang % (U)': '98%' }];
+    store.pokemonMetadata = { speciesDexMap: { charizard: 6 } };
+    store.eliteMovesMap = {};
+    store.cachedRankings = {
+      '1500': { data: [{ speciesId: 'charizard', score: 88 }] }
+    };
+    store.runMatching('1500');
+    expect(store.rawMatched[0].meta.score).toBe(88);
+
+    window.electronAPI = {
+      getRankings: vi.fn().mockImplementation((league) => {
+        return Promise.resolve({ data: [{ speciesId: 'charizard', score: league === '2500' ? 95 : 70 }] });
+      })
+    };
+
+    await store.preloadOtherLeagues();
+
+    expect(store.cachedMatchedByLeague['1500']).toBeDefined();
+    expect(store.cachedMatchedByLeague['2500']).toBeDefined();
+    expect(store.cachedMatchedByLeague['10000']).toBeDefined();
+    expect(store.cachedMatchedByLeague['500']).toBeDefined();
+
+    // The currently displayed rawMatched must NOT have changed from 1500 (score 88)
+    expect(store.rawMatched[0].meta.score).toBe(88);
+
+    // Switching to 2500 should now be instant (no getRankings call)
+    window.electronAPI.getRankings.mockClear();
+    await store.changeLeague('2500');
+    expect(window.electronAPI.getRankings).not.toHaveBeenCalled();
     expect(store.rawMatched[0].meta.score).toBe(95);
   });
 });
