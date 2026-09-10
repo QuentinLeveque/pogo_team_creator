@@ -33,36 +33,36 @@
 - Consumes: Existing CSV files in `old/`
 - Produces: Git-tracked fixture files in `tests/fixtures/`
 
-- [ ] **Step 1: Create `tests/fixtures` and copy CSV files**
+- [x] **Step 1: Create `tests/fixtures` and copy CSV files**
 ```bash
 mkdir -p tests/fixtures
 cp old/poke_genie_export.csv tests/fixtures/poke_genie_export.csv
 cp old/poke_genie_export_2.csv tests/fixtures/poke_genie_export_2.csv
 ```
 
-- [ ] **Step 2: Update `tests/integration.test.js` to point to `tests/fixtures/`**
+- [x] **Step 2: Update `tests/integration.test.js` to point to `tests/fixtures/`**
 In `tests/integration.test.js`:
 ```javascript
   const csvPath = path.resolve(__dirname, './fixtures/poke_genie_export.csv');
   const csvPath2 = path.resolve(__dirname, './fixtures/poke_genie_export_2.csv');
 ```
 
-- [ ] **Step 3: Run integration tests to verify fixtures pass**
+- [x] **Step 3: Run integration tests to verify fixtures pass**
 Run: `npm test tests/integration.test.js`
 Expected: PASS (all 6 tests pass)
 
-- [ ] **Step 4: Remove `old/` directory and remove `old` from `.gitignore`**
+- [x] **Step 4: Remove `old/` directory and remove `old` from `.gitignore`**
 Remove `old` line from `.gitignore`.
 Remove `old/` directory:
 ```bash
 rm -rf old
 ```
 
-- [ ] **Step 5: Run full test suite to ensure nothing else relied on `old/`**
+- [x] **Step 5: Run full test suite to ensure nothing else relied on `old/`**
 Run: `npm test`
 Expected: PASS (all test suites pass)
 
-- [ ] **Step 6: Commit changes**
+- [x] **Step 6: Commit changes**
 ```bash
 git add tests/fixtures/ tests/integration.test.js .gitignore
 git commit -m "refactor(tests): move CSV test fixtures to tests/fixtures and remove legacy old folder"
@@ -83,7 +83,7 @@ git commit -m "refactor(tests): move CSV test fixtures to tests/fixtures and rem
 - Consumes: Electron `saveSettings` API
 - Produces: `pokemonStore.setView(view)` action, single source of truth for list view
 
-- [ ] **Step 1: Write test for `pokemonStore.setView`**
+- [x] **Step 1: Write test for `pokemonStore.setView`**
 In `tests/pokemonStore.test.js`:
 ```javascript
   it('updates activeView and saves setting via setView action', () => {
@@ -97,11 +97,11 @@ In `tests/pokemonStore.test.js`:
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `npm test tests/pokemonStore.test.js`
 Expected: FAIL (`store.setView is not a function`)
 
-- [ ] **Step 3: Implement `setView` in `src/stores/pokemonStore.js` and clean `src/stores/appStore.js`**
+- [x] **Step 3: Implement `setView` in `src/stores/pokemonStore.js` and clean `src/stores/appStore.js`**
 In `src/stores/pokemonStore.js`, add to `actions`:
 ```javascript
     setView(view) {
@@ -116,7 +116,7 @@ In `src/stores/appStore.js`:
 Remove `activeView: 'my-pokemon'`, `searchQuery: ''`, and `sortOption: 'score'` from state.
 Remove `setView(view)` from actions.
 
-- [ ] **Step 4: Update `src/components/ViewToggle.vue` and `src/App.vue`**
+- [x] **Step 4: Update `src/components/ViewToggle.vue` and `src/App.vue`**
 In `src/components/ViewToggle.vue`:
 Remove `useAppStore` import and `appStore` declaration.
 Update `setView`:
@@ -134,11 +134,11 @@ In `onMounted`, update settings load:
     }
 ```
 
-- [ ] **Step 5: Run tests to verify all pass**
+- [x] **Step 5: Run tests to verify all pass**
 Run: `npm test`
 Expected: PASS (all 83 tests pass)
 
-- [ ] **Step 6: Commit changes**
+- [x] **Step 6: Commit changes**
 ```bash
 git add src/stores/appStore.js src/stores/pokemonStore.js src/components/ViewToggle.vue src/App.vue tests/pokemonStore.test.js
 git commit -m "refactor(store): consolidate view/filtering state exclusively into pokemonStore"
@@ -158,7 +158,7 @@ git commit -m "refactor(store): consolidate view/filtering state exclusively int
 - Consumes: Precomputed `frNameToIndex` in `nameTranslator.js`
 - Produces: `getEnglishBase(rawNom)` helper with O(1) performance
 
-- [ ] **Step 1: Write unit test for `getEnglishBase`**
+- [x] **Step 1: Write unit test for `getEnglishBase`**
 In `tests/nameTranslator.test.js`:
 ```javascript
   it('resolves English base name in O(1) from French name using getEnglishBase', () => {
@@ -168,11 +168,11 @@ In `tests/nameTranslator.test.js`:
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `npm test tests/nameTranslator.test.js`
 Expected: FAIL (`getEnglishBase is not defined`)
 
-- [ ] **Step 3: Implement `getEnglishBase` in `src/services/nameTranslator.js`**
+- [x] **Step 3: Implement `getEnglishBase` in `src/services/nameTranslator.js`**
 ```javascript
 export function getEnglishBase(rawNom) {
   if (!rawNom) return '';
@@ -185,7 +185,7 @@ export function getEnglishBase(rawNom) {
 }
 ```
 
-- [ ] **Step 4: Update `src/composables/usePokemonMatcher.js`**
+- [x] **Step 4: Update `src/composables/usePokemonMatcher.js`**
 Remove:
 ```javascript
 import frNames from '../data/fr.json';
@@ -200,7 +200,7 @@ Replace lines 148-151 in `usePokemonMatcher.js`:
           const enBase = getEnglishBase(rawNom);
 ```
 
-- [ ] **Step 5: Remove dead code in `src/components/PokemonRow.vue`**
+- [x] **Step 5: Remove dead code in `src/components/PokemonRow.vue`**
 Remove lines 267-270 in `src/components/PokemonRow.vue`:
 ```javascript
 const primaryTypeColor = computed(() => {
@@ -209,11 +209,11 @@ const primaryTypeColor = computed(() => {
 });
 ```
 
-- [ ] **Step 6: Run test suite to verify everything passes**
+- [x] **Step 6: Run test suite to verify everything passes**
 Run: `npm test`
 Expected: PASS (all test suites pass)
 
-- [ ] **Step 7: Commit changes**
+- [x] **Step 7: Commit changes**
 ```bash
 git add src/services/nameTranslator.js src/composables/usePokemonMatcher.js src/components/PokemonRow.vue tests/nameTranslator.test.js
 git commit -m "perf(matcher): replace linear scan with O(1) getEnglishBase and remove dead code"
@@ -226,7 +226,7 @@ git commit -m "perf(matcher): replace linear scan with O(1) getEnglishBase and r
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Write comprehensive `README.md`**
+- [x] **Step 1: Write comprehensive `README.md`**
 Document:
 - Project title & description
 - Key features (Multi-CSV merge, PvPoke matching, Resource costs, Move analysis, Obscur badges, Offline-first)
@@ -235,15 +235,15 @@ Document:
 - Architecture overview
 - Data Privacy statement
 
-- [ ] **Step 2: Run production build verification**
+- [x] **Step 2: Run production build verification**
 Run: `npm run build`
 Expected: PASS with clean bundle
 
-- [ ] **Step 3: Run full test suite verification**
+- [x] **Step 3: Run full test suite verification**
 Run: `npm test`
 Expected: PASS (all 83+ tests pass)
 
-- [ ] **Step 4: Commit changes**
+- [x] **Step 4: Commit changes**
 ```bash
 git add README.md
 git commit -m "docs: add comprehensive V1 documentation in README"
