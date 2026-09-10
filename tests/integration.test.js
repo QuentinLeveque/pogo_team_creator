@@ -5,8 +5,8 @@ import { parsePokeGenieCsv, getUniqueKey } from '../electron/services/csvManager
 import { matchPokemon } from '../src/composables/usePokemonMatcher.js';
 
 describe('Real-world Data Integration Test', () => {
-  const csvPath = path.resolve(__dirname, '../old/poke_genie_export.csv');
-  const csvPath2 = path.resolve(__dirname, '../old/poke_genie_export_2.csv');
+  const csvPath = path.resolve(__dirname, './fixtures/poke_genie_export.csv');
+  const csvPath2 = path.resolve(__dirname, './fixtures/poke_genie_export_2.csv');
 
   it('parses real poke_genie_export.csv without errors', () => {
     const content = fs.readFileSync(csvPath, 'utf-8');
