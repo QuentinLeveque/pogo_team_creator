@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { toSpeciesId, speciesIdToFrench } from '../src/services/nameTranslator.js';
+import { toSpeciesId, speciesIdToFrench, getEnglishBase } from '../src/services/nameTranslator.js';
+
 
 describe('nameTranslator', () => {
   it('translates standard Pokemon without form', () => {
@@ -83,4 +84,12 @@ describe('nameTranslator', () => {
     const resLougaroc = toSpeciesId('Lougaroc', 'Diurne', false);
     expect(resLougaroc).toEqual({ id: 'lycanroc_midday', unmatched: false, unmatchedForm: null });
   });
+
+  it('resolves English base name in O(1) from French name using getEnglishBase', () => {
+    expect(getEnglishBase('Dracaufeu')).toBe('charizard');
+    expect(getEnglishBase('M. Mime')).toBe('mr_mime');
+    expect(getEnglishBase('UnknownXYZ')).toBe('unknownxyz');
+    expect(getEnglishBase('')).toBe('');
+  });
 });
+

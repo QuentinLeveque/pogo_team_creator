@@ -18,14 +18,22 @@ function normalizeFormKey(str) {
 
 const frNameToIndex = new Map();
 frNames.forEach((name, i) => {
-  if (name) frNameToIndex.set(name.toLowerCase(), i);
+  if (name) {
+    const lower = name.toLowerCase();
+    frNameToIndex.set(lower, i);
+    if (lower.includes('.')) {
+      frNameToIndex.set(lower.replace(/\.\s*/g, '.'), i);
+      frNameToIndex.set(lower.replace(/\./g, '. '), i);
+    }
+  }
 });
 
 const enToFrIndex = new Map();
 enNames.forEach((name, i) => {
   if (name) {
-    const key = name.replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase();
+    const key = name.replace(/\. /g, '_').replace(/ /g, '_').replace(/-/g, '_').replace(/\./g, '_').replace(/_+/g, '_').toLowerCase();
     enToFrIndex.set(key, i);
+    enToFrIndex.set(name.replace(/ /g, '_').replace(/-/g, '_').replace(/\./g, '_').toLowerCase(), i);
   }
 });
 
@@ -42,7 +50,7 @@ export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}
   }
 
   const enRaw = enNames[frIndex];
-  let id = enRaw.replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase();
+  let id = enRaw.replace(/\. /g, '_').replace(/ /g, '_').replace(/-/g, '_').replace(/\./g, '_').replace(/_+/g, '_').toLowerCase();
 
   const combinedForms = { ...defaultForms, ...customForms };
 
@@ -111,3 +119,20 @@ export function speciesIdToFrench(speciesId, customForms = {}) {
 
   return { frenchName, form: formName, isShadow };
 }
+
+export function getEnglishBase(rawNom) {
+  if (!rawNom) return '';
+  const clean = rawNom.trim().toLowerCase();
+  const idx = frNameToIndex.get(clean);
+  if (idx !== undefined && enNames[idx]) {
+    return enNames[idx]
+      .replace(/\. /g, '_')
+      .replace(/ /g, '_')
+      .replace(/-/g, '_')
+      .replace(/\./g, '_')
+      .replace(/_+/g, '_')
+      .toLowerCase();
+  }
+  return clean.replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
+}
+

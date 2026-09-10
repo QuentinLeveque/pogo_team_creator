@@ -253,7 +253,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { TYPE_COLORS } from '../assets/type-colors.js';
 import PokemonSprite from './PokemonSprite.vue';
 
@@ -263,11 +263,6 @@ const props = defineProps({
 defineEmits(['request-remove']);
 
 const isExpanded = ref(false);
-
-const primaryTypeColor = computed(() => {
-  const t = props.item.meta.types?.[0];
-  return TYPE_COLORS[t] || '#718096';
-});
 
 function getTypeColor(t) {
   return TYPE_COLORS[t] || '#718096';

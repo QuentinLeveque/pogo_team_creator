@@ -1,8 +1,6 @@
-import { toSpeciesId, speciesIdToFrench } from '../services/nameTranslator.js';
+import { toSpeciesId, speciesIdToFrench, getEnglishBase } from '../services/nameTranslator.js';
 import { translateMove } from '../data/moves.js';
 import { calculateResourceCosts } from '../utils/costCalculator.js';
-import frNames from '../data/fr.json';
-import enNames from '../data/en.json';
 
 function parsePercent(val) {
   if (!val) return 0;
@@ -145,10 +143,7 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
             unmatchedPokemonSet.add(rawNom);
           }
 
-          const baseFrIndex = frNames.findIndex(n => n.toLowerCase() === rawNom.trim().toLowerCase());
-          const enBase = baseFrIndex !== -1
-            ? enNames[baseFrIndex].replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase()
-            : rawNom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const enBase = getEnglishBase(rawNom);
           const formSuffix = fVal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/%/g, '').replace(/[^a-z0-9]/g, '_').replace(/_+$/, '');
           const generatedId = `${enBase}_${formSuffix}`;
 
