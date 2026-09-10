@@ -8,8 +8,6 @@
 
 - **📥 Bibliothèque Multi-CSV** : Import, fusion intelligente et déduplication automatique de vos exports PokeGenie.
 - **🏆 Méta PvPoke** : Classements compétitifs pour les 4 ligues (Super 1500, Hyper 2500, Master et Petite 500).
-- **⚡ Zéro Latence (0 ms)** : Architecture cache-first locale et préchargement transparent en arrière-plan pour un basculement instantané.
-- **🟣 Spécialisation Obscurs** : Badges violets dédiés et isolation stricte entre spécimens normaux et obscurs.
 - **⚔️ Analyse des Attaques** : Comparatif côte à côte (PvPoke vs vos attaques), détection des attaques nécessitant une CT d'élite (`⭐ Élite`) et noms en français.
 - **💎 Coûts & Filtre XL** : Calcul précis de la poussière d'étoiles, bonbons et bonbons XL requis, avec filtre rapide sans XL.
 - **🔍 Gestion des Formes** : Outil interactif pour associer les formes événementielles ou méconnues à leur variante standard.
@@ -103,11 +101,10 @@ pogo_team_creator/
 
 ## 📄 Licence & Mentions Légales
 
-### Licence
+### Licence du Projet
 Ce projet est open-source et distribué sous licence **MIT** (voir le fichier [`LICENSE`](file:///home/quentin/Documents/script/pogo_team_creator/LICENSE)).
 
-### Mentions Légales & Crédits
-- **Pokémon** et les noms associés sont des marques déposées de **Nintendo**, **Creatures Inc.** et **GAME FREAK Inc.** / **The Pokémon Company**.
-- Ce projet est un outil créé par des fans à des fins non commerciales et n'est ni affilié ni approuvé par Niantic, Nintendo ou The Pokémon Company.
-- Les données de classements et du Game Master proviennent de [PvPoke](https://pvpoke.com/).
-- Les sprites officiels sont fournis par [PokeAPI](https://pokeapi.co/).
+### Mentions Légales & Ressources Tierces
+- **PokéAPI** : Les sprites officiels et données de base sont distribués sous licence **BSD 3-Clause** (Copyright (c) 2013–2023 Paul Hallett et contributeurs PokéAPI).
+- **PvPoke** : Les classements compétitifs et le Game Master proviennent de [PvPoke](https://pvpoke.com/).
+- **Pokémon** et les noms associés sont des marques déposées de **Nintendo**, **Creatures Inc.** et **GAME FREAK Inc.** / **The Pokémon Company**. Ce logiciel est un projet non officiel créé par des fans à des fins non commerciales.
