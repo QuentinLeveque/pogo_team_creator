@@ -296,10 +296,130 @@ describe('PokemonRow.vue', () => {
     expect(stageCards[1].text()).toContain('Non possédé');
 
     expect(stageCards[2].text()).toContain('Florizarre');
-    expect(stageCards[2].text()).toContain('Cible Ligue');
+    expect(stageCards[2].text()).toContain('Cible');
+    expect(stageCards[2].text()).toContain('En stock');
+    expect(stageCards[2].text()).not.toContain('Cible Ligue #');
 
     // Vérifier la présence des flèches
     const arrows = wrapper.findAll('.stage-arrow');
     expect(arrows.length).toBe(2);
+  });
+
+  it('displays owned rank for evolved stage and unevolved stage, or non-possédé if unowned', async () => {
+    const itemWithBothOwned = {
+      meta: {
+        speciesId: 'araquanid',
+        dexNumber: 752,
+        nameFr: 'Tarenbulle',
+        score: 88,
+        rank: 22,
+        types: ['Eau', 'Insecte'],
+        evolutionLine: [
+          {
+            speciesId: 'dewpider',
+            dexNumber: 751,
+            nameFr: 'Araqua',
+            isTarget: false,
+            isOwned: true,
+            ownedCandidate: { name: 'Araqua', ivRankPercent: 96.6, ivRankNumber: 140 }
+          },
+          {
+            speciesId: 'araquanid',
+            dexNumber: 752,
+            nameFr: 'Tarenbulle',
+            isTarget: true,
+            isOwned: true,
+            ownedCandidate: { name: 'Tarenbulle', ivRankPercent: 82.1, ivRankNumber: 750 }
+          }
+        ],
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [],
+        counters: []
+      },
+      mine: {
+        dexNumber: 752,
+        name: 'Tarenbulle',
+        ivRankPercent: 82.1,
+        ivRankNumber: 750,
+        betterUnevolvedCandidate: {
+          name: 'Araqua',
+          ivRankPercent: 96.6,
+          ivRankNumber: 140
+        },
+        uniqueKey: 'tar1'
+      }
+    };
+
+    const wrapper = mount(PokemonRow, {
+      props: { item: itemWithBothOwned }
+    });
+
+    await wrapper.find('.row-header').trigger('click');
+
+    const stages = wrapper.findAll('.stage-card');
+    expect(stages.length).toBe(2);
+
+    // Araqua stage
+    expect(stages[0].text()).toContain('Araqua');
+    expect(stages[0].text()).toContain('En stock');
+    expect(stages[0].text()).toContain('96.6% #140');
+
+    // Tarenbulle stage shows target badge AND owned status with its own IV rank #750
+    expect(stages[1].text()).toContain('Tarenbulle');
+    expect(stages[1].text()).toContain('Cible');
+    expect(stages[1].text()).toContain('En stock');
+    expect(stages[1].text()).toContain('82.1% #750');
+    // Does NOT contain the confusing '#22' in the evolution stage
+    expect(stages[1].find('.badge-target').text()).toBe('🎯 Cible');
+
+    // If target stage is unowned
+    const itemWithUnownedTarget = {
+      meta: {
+        speciesId: 'araquanid',
+        dexNumber: 752,
+        nameFr: 'Tarenbulle',
+        score: 88,
+        rank: 22,
+        types: ['Eau', 'Insecte'],
+        evolutionLine: [
+          {
+            speciesId: 'dewpider',
+            dexNumber: 751,
+            nameFr: 'Araqua',
+            isTarget: false,
+            isOwned: true,
+            ownedCandidate: { name: 'Araqua', ivRankPercent: 96.6, ivRankNumber: 140 }
+          },
+          {
+            speciesId: 'araquanid',
+            dexNumber: 752,
+            nameFr: 'Tarenbulle',
+            isTarget: true,
+            isOwned: false
+          }
+        ],
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [],
+        counters: []
+      },
+      mine: {
+        dexNumber: 751,
+        name: 'Araqua',
+        ivRankPercent: 96.6,
+        ivRankNumber: 140,
+        needsEvolution: true,
+        uniqueKey: 'ara1'
+      }
+    };
+
+    const wrapper2 = mount(PokemonRow, {
+      props: { item: itemWithUnownedTarget }
+    });
+
+    await wrapper2.find('.row-header').trigger('click');
+    const stages2 = wrapper2.findAll('.stage-card');
+    expect(stages2[1].text()).toContain('Tarenbulle');
+    expect(stages2[1].text()).toContain('Cible');
+    expect(stages2[1].text()).toContain('Non possédé');
   });
 });

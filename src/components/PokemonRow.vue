@@ -83,10 +83,15 @@
             <div :class="['stage-card', { 'is-target': stage.isTarget, 'is-owned': stage.isOwned }]">
               <PokemonSprite :dex-number="stage.dexNumber" :alt="stage.nameFr" class="stage-sprite" />
               <div class="stage-info">
-                <span class="stage-name">{{ stage.nameFr }}</span>
-                <span v-if="stage.isTarget" class="badge-target">🎯 Cible Ligue #{{ item.meta.rank }}</span>
-                <span v-else-if="stage.isOwned && stage.ownedCandidate" class="badge-owned">
-                  ✅ En stock ({{ stage.ownedCandidate.ivRankPercent ? `Rang ${stage.ownedCandidate.ivRankPercent.toFixed(1)}%` : `IV ${stage.ownedCandidate.ivAverage?.toFixed(1)}%` }})
+                <div class="stage-name-line">
+                  <span class="stage-name">{{ stage.nameFr }}</span>
+                  <span v-if="stage.isTarget" class="badge-target">🎯 Cible</span>
+                </div>
+                <span v-if="stage.isOwned && stage.ownedCandidate" class="badge-owned">
+                  ✅ En stock ({{ stage.ownedCandidate.ivRankPercent ? `Rang ${stage.ownedCandidate.ivRankPercent.toFixed(1)}%${stage.ownedCandidate.ivRankNumber ? ` #${stage.ownedCandidate.ivRankNumber}` : ''}` : `IV ${stage.ownedCandidate.ivAverage?.toFixed(1)}%` }})
+                </span>
+                <span v-else-if="stage.isOwned" class="badge-owned">
+                  ✅ En stock
                 </span>
                 <span v-else class="badge-missing">❌ Non possédé</span>
               </div>
@@ -109,7 +114,7 @@
               Rang : <strong>{{ item.mine.ivRankPercent ? `${item.mine.ivRankPercent.toFixed(1)}% #${item.mine.ivRankNumber}` : `${item.mine.ivAverage.toFixed(1)}%` }}</strong>
             </div>
             <div class="comp-cost">
-              Coût : ✨ {{ item.mine.dustCost.toLocaleString('fr-FR') }} · 🍬 {{ item.mine.candyCost }}
+              Coût : ✨ {{ (item.mine.dustCost || 0).toLocaleString('fr-FR') }} · 🍬 {{ item.mine.candyCost || 0 }}
               <span v-if="item.mine.requiresXl"> · 🔷 {{ item.mine.xlCandyCost }} XL</span>
             </div>
           </div>
@@ -123,7 +128,7 @@
               Rang supérieur : <strong>{{ item.mine.betterUnevolvedCandidate.ivRankPercent?.toFixed(1) }}% #{{ item.mine.betterUnevolvedCandidate.ivRankNumber }}</strong>
             </div>
             <div class="comp-cost">
-              Coût d'évolution & boost : ✨ {{ item.mine.betterUnevolvedCandidate.dustCost.toLocaleString('fr-FR') }} · 🍬 {{ item.mine.betterUnevolvedCandidate.candyCost }}
+              Coût d'évolution & boost : ✨ {{ (item.mine.betterUnevolvedCandidate.dustCost || 0).toLocaleString('fr-FR') }} · 🍬 {{ item.mine.betterUnevolvedCandidate.candyCost || 0 }}
               <span v-if="item.mine.betterUnevolvedCandidate.xlCandyCost > 0"> · 🔷 {{ item.mine.betterUnevolvedCandidate.xlCandyCost }} XL</span>
             </div>
           </div>
@@ -758,9 +763,15 @@ function getTypeColor(t) {
   box-shadow: 0 0 0 1px #BFDBFE;
 }
 
-.stage-card.is-owned:not(.is-target) {
+.stage-card.is-owned {
   border-color: #A7F3D0;
   background: #F0FDF4;
+}
+
+.stage-card.is-target.is-owned {
+  border-color: #93C5FD;
+  background: #F0FDF4;
+  box-shadow: 0 0 0 1px #93C5FD;
 }
 
 .stage-sprite {
@@ -774,6 +785,12 @@ function getTypeColor(t) {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+
+.stage-name-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .stage-name {
