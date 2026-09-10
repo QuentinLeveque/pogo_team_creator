@@ -17,14 +17,11 @@
 
 <script setup>
 import { usePokemonStore } from '../stores/pokemonStore.js';
-import { useAppStore } from '../stores/appStore.js';
 
 const pokemonStore = usePokemonStore();
-const appStore = useAppStore();
 
 function setView(view) {
-  pokemonStore.activeView = view;
-  appStore.setView(view);
+  pokemonStore.setView(view);
 }
 </script>
 

@@ -3,9 +3,6 @@ import { defineStore } from 'pinia';
 export const useAppStore = defineStore('app', {
   state: () => ({
     activeLeague: '1500',
-    activeView: 'my-pokemon', // 'my-pokemon' | 'meta'
-    searchQuery: '',
-    sortOption: 'score', // 'score' | 'ivRank' | 'name' | 'cost'
     importHistory: [],
     unmatchedForms: [],
     unmatchedPokemonNames: [],
@@ -20,12 +17,6 @@ export const useAppStore = defineStore('app', {
       this.activeLeague = league;
       if (typeof window !== 'undefined' && window.electronAPI?.saveSettings) {
         window.electronAPI.saveSettings({ lastActiveLeague: league });
-      }
-    },
-    setView(view) {
-      this.activeView = view;
-      if (typeof window !== 'undefined' && window.electronAPI?.saveSettings) {
-        window.electronAPI.saveSettings({ lastView: view });
       }
     },
     showToast(msg) {

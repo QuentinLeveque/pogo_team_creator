@@ -232,6 +232,14 @@ export const usePokemonStore = defineStore('pokemon', {
       } finally {
         this.isRefreshingPvpoke = false;
       }
+    },
+
+    setView(view) {
+      this.activeView = view;
+      if (typeof window !== 'undefined' && window.electronAPI?.saveSettings) {
+        window.electronAPI.saveSettings({ lastView: view });
+      }
     }
   }
 });
+

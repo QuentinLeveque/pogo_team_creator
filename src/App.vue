@@ -38,7 +38,6 @@ onMounted(async () => {
     const settings = await window.electronAPI.getSettings();
     if (settings.lastActiveLeague) appStore.activeLeague = settings.lastActiveLeague;
     if (settings.lastView) {
-      appStore.activeView = settings.lastView;
       pokemonStore.activeView = settings.lastView;
     }
   }

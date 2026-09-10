@@ -159,6 +159,17 @@ describe('pokemonStore', () => {
     expect(window.electronAPI.getRankings).not.toHaveBeenCalled();
     expect(store.rawMatched[0].meta.score).toBe(95);
   });
+
+  it('updates activeView and saves setting via setView action', () => {
+    const store = usePokemonStore();
+    window.electronAPI = {
+      saveSettings: vi.fn()
+    };
+    store.setView('meta');
+    expect(store.activeView).toBe('meta');
+    expect(window.electronAPI.saveSettings).toHaveBeenCalledWith({ lastView: 'meta' });
+  });
 });
+
 
 
