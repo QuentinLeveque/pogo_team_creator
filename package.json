@@ -2,7 +2,7 @@
   "name": "pogo-team-creator",
   "version": "1.0.0",
   "description": "Cross-reference Pokémon GO PokeGenie exports with PvPoke rankings",
-  "author": "Quentin",
+  "author": "Quentin <quentin@users.noreply.github.com>",
   "license": "MIT",
   "main": "electron/main.js",
   "scripts": {
