@@ -29,7 +29,11 @@ export const usePokemonStore = defineStore('pokemon', {
       }
 
       if (state.excludeXl) {
-        list = list.filter(item => !item.mine || !item.mine.requiresXl);
+        list = list.filter(item => {
+          const mineRequiresXl = item.mine ? item.mine.requiresXl : false;
+          const metaRequiresXl = item.meta ? Boolean(item.meta.requiresXl) : false;
+          return !mineRequiresXl && !metaRequiresXl;
+        });
       }
 
       if (state.searchQuery.trim() !== '') {

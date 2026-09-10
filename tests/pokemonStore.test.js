@@ -63,13 +63,14 @@ describe('pokemonStore', () => {
   it('filters out pokemon requiring XL candy when excludeXl is true', () => {
     const store = usePokemonStore();
     store.rawMatched = [
-      { meta: { nameFr: 'Azumarill', score: 90 }, mine: { name: 'Azumarill', requiresXl: true } },
-      { meta: { nameFr: 'Laggron', score: 88 }, mine: { name: 'Laggron', requiresXl: false } }
+      { meta: { nameFr: 'Azumarill', score: 90, requiresXl: false }, mine: { name: 'Azumarill', requiresXl: true } },
+      { meta: { nameFr: 'Méditikka', score: 92, requiresXl: true }, mine: null },
+      { meta: { nameFr: 'Laggron', score: 88, requiresXl: false }, mine: { name: 'Laggron', requiresXl: false } }
     ];
-    store.activeView = 'my-pokemon';
+    store.activeView = 'meta';
 
     store.excludeXl = false;
-    expect(store.displayedPokemon.length).toBe(2);
+    expect(store.displayedPokemon.length).toBe(3);
 
     store.excludeXl = true;
     expect(store.displayedPokemon.length).toBe(1);
