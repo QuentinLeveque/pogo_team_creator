@@ -44,4 +44,43 @@ describe('FormMappingEditor.vue', () => {
     expect(pokemonBox.exists()).toBe(true);
     expect(pokemonBox.text()).toContain('Deoxys, Necrozma');
   });
+
+  it('renders diagnostic table with pokemon info and allows setting empty standard form suffix', async () => {
+    const appStore = useAppStore();
+    appStore.isFormEditorOpen = true;
+    appStore.unmatchedForms = ['Costume Fête'];
+    appStore.unmatchedFormDetails = [
+      {
+        pokemonNameFr: 'Pikachu',
+        rawForm: 'Costume Fête',
+        dexNumber: 25,
+        generatedId: 'pikachu_costume_fete',
+        count: 3
+      }
+    ];
+
+    window.electronAPI = {
+      saveForms: vi.fn().mockResolvedValue({})
+    };
+
+    const wrapper = mount(FormMappingEditor);
+
+    // Vérifier la présence du tableau diagnostique
+    expect(wrapper.find('.diagnostic-table').exists()).toBe(true);
+    expect(wrapper.text()).toContain('Pikachu');
+    expect(wrapper.text()).toContain('Costume Fête');
+    expect(wrapper.text()).toContain('pikachu_costume_fete');
+    expect(wrapper.text()).toContain('3 ex.');
+
+    // Clic sur le bouton action rapide "Forme standard"
+    const standardBtn = wrapper.find('.standard-form-btn');
+    expect(standardBtn.exists()).toBe(true);
+    await standardBtn.trigger('click');
+
+    // Sauvegarder
+    await wrapper.find('.save-btn').trigger('click');
+    expect(window.electronAPI.saveForms).toHaveBeenCalledWith({
+      'Costume Fête': ''
+    });
+  });
 });

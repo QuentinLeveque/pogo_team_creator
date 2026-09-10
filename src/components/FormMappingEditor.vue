@@ -8,24 +8,62 @@
 
       <p class="editor-desc">
         Les formes suivantes issues de vos imports PokeGenie n'ont pas de correspondance avec PvPoke.
-        Entrez le suffixe anglais correspondant (ex: <code>galarian</code>, <code>origin</code>, <code>mega</code>, <code>therian</code>).
+        Pour les Pokémon sans forme alternative (ex: costumes événementiels), cliquez sur <strong>⚡ Forme standard</strong> pour ignorer le suffixe.
+        Pour les vraies formes régionales ou alternatives (ex: Alola, Galar, Totem), renseignez le suffixe anglais correspondant.
       </p>
 
       <div v-if="appStore.unmatchedPokemonNames && appStore.unmatchedPokemonNames.length > 0" class="affected-pokemon-box">
         <strong>Pokémon concernés :</strong> {{ appStore.unmatchedPokemonNames.join(', ') }}
       </div>
 
-      <div class="form-mappings-list">
-        <div v-for="form in appStore.unmatchedForms" :key="form" class="mapping-row">
-          <span class="french-form">{{ form }}</span>
-          <span class="arrow">→</span>
-          <input
-            v-model="inputMappings[form]"
-            type="text"
-            class="suffix-input"
-            placeholder="suffixe anglais (ex: sky)"
-          />
-        </div>
+      <div class="table-container">
+        <table class="diagnostic-table">
+          <thead>
+            <tr>
+              <th>Pokémon</th>
+              <th>Forme CSV</th>
+              <th>ID PvPoke calculé</th>
+              <th>Action / Suffixe PvPoke</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in diagnosticRows" :key="row.key" class="diagnostic-row">
+              <td class="pokemon-cell">
+                <PokemonSprite :dex-number="row.dexNumber" />
+                <div class="pokemon-info">
+                  <span class="pokemon-name">{{ row.pokemonNameFr }}</span>
+                  <span v-if="row.count" class="specimen-count">{{ row.count }} ex.</span>
+                </div>
+              </td>
+              <td class="form-cell">
+                <span class="raw-form-badge">{{ row.rawForm }}</span>
+              </td>
+              <td class="id-cell">
+                <code>{{ row.generatedId }}</code>
+              </td>
+              <td class="action-cell">
+                <div class="action-wrapper">
+                  <button
+                    type="button"
+                    class="standard-form-btn"
+                    :class="{ active: inputMappings[row.rawForm] === '' && isExplicitStandard[row.rawForm] }"
+                    @click="setStandardForm(row.rawForm)"
+                    title="Traiter comme forme standard sans aucun suffixe"
+                  >
+                    ⚡ Forme standard
+                  </button>
+                  <input
+                    v-model="inputMappings[row.rawForm]"
+                    type="text"
+                    class="suffix-input"
+                    placeholder="ou suffixe (ex: alolan)"
+                    @input="onInputSuffix(row.rawForm)"
+                  />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="modal-footer">
@@ -37,28 +75,74 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { useAppStore } from '../stores/appStore.js';
 import { usePokemonStore } from '../stores/pokemonStore.js';
+import PokemonSprite from './PokemonSprite.vue';
 
 const appStore = useAppStore();
 const pokemonStore = usePokemonStore();
 
 const inputMappings = reactive({});
+const isExplicitStandard = reactive({});
+
+const diagnosticRows = computed(() => {
+  if (appStore.unmatchedFormDetails && appStore.unmatchedFormDetails.length > 0) {
+    return appStore.unmatchedFormDetails.map(d => ({
+      key: `${d.pokemonNameFr}_${d.rawForm}`,
+      pokemonNameFr: d.pokemonNameFr,
+      rawForm: d.rawForm,
+      dexNumber: d.dexNumber || 0,
+      generatedId: d.generatedId || '',
+      count: d.count || 0
+    }));
+  }
+  return (appStore.unmatchedForms || []).map(form => ({
+    key: form,
+    pokemonNameFr: appStore.unmatchedPokemonNames?.[0] || 'Pokémon',
+    rawForm: form,
+    dexNumber: 0,
+    generatedId: form.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_'),
+    count: 0
+  }));
+});
 
 watch(
-  () => appStore.unmatchedForms,
-  (forms) => {
-    if (forms) {
-      forms.forEach(f => {
-        if (inputMappings[f] === undefined) {
-          inputMappings[f] = appStore.customForms[f] || '';
+  [() => appStore.unmatchedForms, () => appStore.unmatchedFormDetails],
+  () => {
+    const forms = appStore.unmatchedForms || [];
+    forms.forEach(f => {
+      if (inputMappings[f] === undefined) {
+        inputMappings[f] = appStore.customForms[f] !== undefined ? appStore.customForms[f] : '';
+        if (appStore.customForms[f] === '') {
+          isExplicitStandard[f] = true;
+        }
+      }
+    });
+    if (appStore.unmatchedFormDetails) {
+      appStore.unmatchedFormDetails.forEach(d => {
+        if (inputMappings[d.rawForm] === undefined) {
+          inputMappings[d.rawForm] = appStore.customForms[d.rawForm] !== undefined ? appStore.customForms[d.rawForm] : '';
+          if (appStore.customForms[d.rawForm] === '') {
+            isExplicitStandard[d.rawForm] = true;
+          }
         }
       });
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
+
+function setStandardForm(formName) {
+  inputMappings[formName] = '';
+  isExplicitStandard[formName] = true;
+}
+
+function onInputSuffix(formName) {
+  if (inputMappings[formName] && inputMappings[formName].trim() !== '') {
+    isExplicitStandard[formName] = false;
+  }
+}
 
 function close() {
   appStore.isFormEditorOpen = false;
@@ -69,6 +153,8 @@ async function save() {
   for (const [form, suffix] of Object.entries(inputMappings)) {
     if (suffix && suffix.trim() !== '') {
       patch[form] = suffix.trim().toLowerCase();
+    } else if (isExplicitStandard[form]) {
+      patch[form] = '';
     }
   }
 
@@ -85,98 +171,247 @@ async function save() {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 }
+
 .modal-box {
   background: #FFFFFF;
-  border-radius: 10px;
-  width: 550px;
-  max-width: 90%;
+  border-radius: 12px;
+  width: 760px;
+  max-width: 95%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
+
 .modal-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1E293B;
 }
+
 .close-btn {
   background: none;
   border: none;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   cursor: pointer;
-  color: #718096;
+  color: #94A3B8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
 }
+
+.close-btn:hover {
+  color: #475569;
+}
+
 .editor-desc {
   font-size: 0.85rem;
-  color: #4A5568;
-  line-height: 1.4;
-  margin-bottom: 1.25rem;
+  color: #475569;
+  line-height: 1.45;
+  margin-bottom: 1rem;
 }
+
+.editor-desc code {
+  background: #F1F5F9;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #0F172A;
+}
+
 .affected-pokemon-box {
   background: #FEF3C7;
   border: 1px solid #F59E0B;
   color: #92400E;
-  padding: 0.6rem 0.8rem;
+  padding: 0.55rem 0.85rem;
   border-radius: 6px;
-  font-size: 0.85rem;
-  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
   line-height: 1.4;
 }
-.form-mappings-list {
-  max-height: 250px;
+
+.table-container {
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  max-height: 340px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
-.mapping-row {
+
+.diagnostic-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.diagnostic-table thead {
+  position: sticky;
+  top: 0;
+  background: #F8FAFC;
+  z-index: 2;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.diagnostic-table th {
+  padding: 0.65rem 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.diagnostic-row {
+  border-bottom: 1px solid #F1F5F9;
+  transition: background 0.15s ease;
+}
+
+.diagnostic-row:hover {
+  background: #F8FAFC;
+}
+
+.diagnostic-table td {
+  padding: 0.65rem 0.75rem;
+  vertical-align: middle;
+}
+
+.pokemon-cell {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
-.french-form {
-  width: 130px;
+
+.pokemon-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pokemon-name {
   font-weight: 600;
-  font-size: 0.85rem;
+  color: #1E293B;
 }
-.arrow {
-  color: #A0AEC0;
+
+.specimen-count {
+  font-size: 0.72rem;
+  color: #64748B;
 }
+
+.raw-form-badge {
+  display: inline-block;
+  background: #EEF2F6;
+  color: #334155;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.id-cell code {
+  background: #F1F5F9;
+  color: #0284C7;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.action-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.standard-form-btn {
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #CBD5E1;
+  background: #F8FAFC;
+  color: #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.standard-form-btn:hover {
+  background: #E2E8F0;
+  border-color: #94A3B8;
+}
+
+.standard-form-btn.active {
+  background: #ECFDF5;
+  color: #047857;
+  border-color: #10B981;
+}
+
 .suffix-input {
-  flex: 1;
-  padding: 0.4rem 0.6rem;
+  width: 140px;
+  padding: 0.35rem 0.55rem;
   border: 1px solid #CBD5E1;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  outline: none;
+  transition: border-color 0.15s ease;
 }
+
+.suffix-input:focus {
+  border-color: #3B82F6;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+  padding-top: 0.5rem;
 }
+
 .cancel-btn {
   padding: 0.5rem 1rem;
-  background: #E2E8F0;
-  border: none;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
   border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
+
+.cancel-btn:hover {
+  background: #E2E8F0;
+}
+
 .save-btn {
-  padding: 0.5rem 1rem;
-  background: #3B82F6;
+  padding: 0.5rem 1.1rem;
+  background: #2563EB;
   color: white;
   border: none;
   border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.save-btn:hover {
+  background: #1D4ED8;
 }
 </style>

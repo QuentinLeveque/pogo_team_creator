@@ -322,7 +322,7 @@ git commit -m "feat(diagnostics): collect detailed unmatchedFormDetails with spr
   - Bouton `⚡ Forme standard (sans suffixe)` qui renseigne `inputMappings[form] = ""`
   - Sauvegarde via `window.electronAPI.saveForms`
 
-- [ ] **Step 1: Écrire le test unitaire pour le tableau diagnostique dans `tests/components/FormMappingEditor.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour le tableau diagnostique dans `tests/components/FormMappingEditor.test.js`**
 
 Dans `tests/components/FormMappingEditor.test.js`, ajouter :
 
@@ -367,12 +367,12 @@ it('renders diagnostic table with pokemon info and allows setting empty standard
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/FormMappingEditor.test.js`  
 Résultat attendu : FAIL car `.diagnostic-table` et `.standard-form-btn` n'existent pas encore.
 
-- [ ] **Step 3: Implémenter le tableau diagnostique dans `src/components/FormMappingEditor.vue`**
+- [x] **Step 3: Implémenter le tableau diagnostique dans `src/components/FormMappingEditor.vue`**
 
 1. Remplacer la liste simple par le tableau structuré `.diagnostic-table` :
    - En-tête : `Pokémon`, `Forme CSV`, `ID PvPoke calculé`, `Suffixe PvPoke`.
@@ -388,12 +388,12 @@ Résultat attendu : FAIL car `.diagnostic-table` et `.standard-form-btn` n'exist
    Permettre l'enregistrement de `patch[form] = ""` pour les formes explicitement sans suffixe.
 4. Styliser le tableau avec bordures fines, typographie soignée et alignements propres.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/FormMappingEditor.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/FormMappingEditor.vue tests/components/FormMappingEditor.test.js
