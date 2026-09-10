@@ -102,5 +102,25 @@ describe('pvpokeCache', () => {
     expect(familyMap.bulbasaur.parent).toBeUndefined();
     expect(familyMap.skarmory.parent).toBeUndefined();
   });
+
+  it('calculates max CP at level 40 for gamemaster species', async () => {
+    const fakeGameMaster = {
+      pokemon: [
+        { speciesId: 'medicham', dex: 308, baseStats: { atk: 121, def: 152, hp: 155 } },
+        { speciesId: 'swampert', dex: 260, baseStats: { atk: 208, def: 175, hp: 225 } }
+      ]
+    };
+    const gmFile = path.join(tmpDir, 'cache', 'gamemaster.json');
+    const metaFile = path.join(tmpDir, 'cache', 'cache-meta.json');
+    fs.mkdirSync(path.join(tmpDir, 'cache'), { recursive: true });
+    fs.writeFileSync(gmFile, JSON.stringify(fakeGameMaster), 'utf-8');
+    fs.writeFileSync(metaFile, JSON.stringify({ gamemaster: new Date().toISOString() }), 'utf-8');
+
+    const meta = await getGamemasterPokemonMetadata(true);
+    expect(meta.speciesStatsMap).toBeDefined();
+    expect(meta.speciesStatsMap.medicham).toBeDefined();
+    expect(meta.speciesStatsMap.medicham.maxCp40).toBeLessThan(1500);
+    expect(meta.speciesStatsMap.swampert.maxCp40).toBeGreaterThan(2500);
+  });
 });
 

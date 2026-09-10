@@ -153,6 +153,9 @@ async function getGamemasterPokemonMetadata(forceRefresh = false) {
   const gm = await getGameMaster(forceRefresh);
   const speciesDexMap = {};
   const familyMap = {};
+  const speciesStatsMap = {};
+
+  const CPM_40 = 0.7903001;
 
   if (gm && Array.isArray(gm.pokemon)) {
     for (const p of gm.pokemon) {
@@ -163,11 +166,20 @@ async function getGamemasterPokemonMetadata(forceRefresh = false) {
         if (p.family) {
           familyMap[p.speciesId] = p.family;
         }
+        if (p.baseStats && p.baseStats.atk && p.baseStats.def && p.baseStats.hp) {
+          const atk = p.baseStats.atk;
+          const def = p.baseStats.def;
+          const hp = p.baseStats.hp;
+          const maxCp40 = Math.floor(
+            ((atk + 15) * Math.sqrt(def + 15) * Math.sqrt(hp + 15) * (CPM_40 ** 2)) / 10
+          );
+          speciesStatsMap[p.speciesId] = { maxCp40 };
+        }
       }
     }
   }
 
-  gamemasterMetadataCache = { speciesDexMap, familyMap };
+  gamemasterMetadataCache = { speciesDexMap, familyMap, speciesStatsMap };
   return gamemasterMetadataCache;
 }
 
