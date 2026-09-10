@@ -70,5 +70,17 @@ describe('nameTranslator', () => {
 
     const resPomPom = toSpeciesId('Plumeline', 'Pom Pom', false);
     expect(resPomPom).toEqual({ id: 'oricorio_pom_pom', unmatched: false, unmatchedForm: null });
+
+    const resZygarde = toSpeciesId('Zygarde', '10%', false);
+    expect(resZygarde).toEqual({ id: 'zygarde_10', unmatched: false, unmatchedForm: null });
+
+    const resHoopa = toSpeciesId('Hoopa', 'Enchaîné', false);
+    expect(resHoopa).toEqual({ id: 'hoopa', unmatched: false, unmatchedForm: null });
+
+    const resHoopaUnaccented = toSpeciesId('Hoopa', 'Enchaine', false);
+    expect(resHoopaUnaccented).toEqual({ id: 'hoopa', unmatched: false, unmatchedForm: null });
+
+    const resLougaroc = toSpeciesId('Lougaroc', 'Diurne', false);
+    expect(resLougaroc).toEqual({ id: 'lycanroc_midday', unmatched: false, unmatchedForm: null });
   });
 });

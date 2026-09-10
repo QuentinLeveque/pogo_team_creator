@@ -307,5 +307,76 @@ describe('usePokemonMatcher', () => {
     expect(kyuremDetail.generatedId).toBe('kyurem_forme_bizarre');
     expect(kyuremDetail.count).toBe(1);
   });
+
+  it('correctly matches Rocabot Diurne, Zygarde 10%, and Hoopa Enchaîné with gamemaster metadata', () => {
+    const masterList = [
+      {
+        Nom: 'Rocabot',
+        Forme: 'Diurne',
+        Pokemon: '744',
+        'Nom (G)': 'Lougaroc',
+        'Forme (G)': 'Diurne',
+        'Rang % (G)': '95.0%',
+        'Rang # (G)': '50'
+      },
+      {
+        Nom: 'Zygarde',
+        Forme: '10%',
+        Pokemon: '718',
+        'Nom (G)': 'Zygarde',
+        'Forme (G)': '10%',
+        'Rang % (G)': '92.0%',
+        'Rang # (G)': '80'
+      },
+      {
+        Nom: 'Hoopa',
+        Forme: 'Enchaîné',
+        Pokemon: '720',
+        'Nom (G)': 'Hoopa',
+        'Forme (G)': 'Enchaîné',
+        'Rang % (G)': '89.0%',
+        'Rang # (G)': '120'
+      }
+    ];
+
+    const mockRankings = [
+      { speciesId: 'lycanroc_midday', score: 85, moveset: [] },
+      { speciesId: 'zygarde_10', score: 90, moveset: [] },
+      { speciesId: 'hoopa', score: 80, moveset: [] }
+    ];
+
+    const metadata = {
+      speciesDexMap: {
+        rockruff: 744,
+        lycanroc_midday: 745,
+        zygarde: 718,
+        zygarde_10: 718,
+        hoopa: 720
+      },
+      familyMap: {
+        lycanroc_midday: { parent: 'rockruff' }
+      }
+    };
+
+    const { matched, unmatchedForms } = matchPokemon(masterList, mockRankings, '1500', {}, {}, metadata);
+
+    expect(unmatchedForms).toEqual([]);
+
+    const lycanrocMatch = matched.find(m => m.meta.speciesId === 'lycanroc_midday');
+    expect(lycanrocMatch).toBeDefined();
+    expect(lycanrocMatch.mine).not.toBeNull();
+    expect(lycanrocMatch.mine.name).toBe('Rocabot');
+    expect(lycanrocMatch.mine.needsEvolution).toBe(true);
+
+    const zygardeMatch = matched.find(m => m.meta.speciesId === 'zygarde_10');
+    expect(zygardeMatch).toBeDefined();
+    expect(zygardeMatch.mine).not.toBeNull();
+    expect(zygardeMatch.mine.name).toBe('Zygarde');
+
+    const hoopaMatch = matched.find(m => m.meta.speciesId === 'hoopa');
+    expect(hoopaMatch).toBeDefined();
+    expect(hoopaMatch.mine).not.toBeNull();
+    expect(hoopaMatch.mine.name).toBe('Hoopa');
+  });
 });
 

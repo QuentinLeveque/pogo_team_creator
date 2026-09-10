@@ -14,6 +14,20 @@ function parseNumber(val) {
   return parseFloat(String(val).replace(',', '.')) || 0;
 }
 
+function resolveGamemasterSpeciesId(speciesId, rawNom, isShadow, customForms, speciesDexMap) {
+  if (!speciesId || !speciesDexMap || Object.keys(speciesDexMap).length === 0) return speciesId;
+  const clean = speciesId.replace(/_shadow$/, '');
+  if (speciesDexMap[clean] || speciesDexMap[speciesId]) {
+    return speciesId;
+  }
+  const baseTranslation = toSpeciesId(rawNom, '', isShadow, customForms);
+  const cleanBase = baseTranslation.id.replace(/_shadow$/, '');
+  if (speciesDexMap[cleanBase] || speciesDexMap[baseTranslation.id]) {
+    return baseTranslation.id;
+  }
+  return speciesId;
+}
+
 function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
   if (!familyMap || !speciesId) return null;
   const cleanId = (id) => id ? id.replace(/_shadow$/, '') : '';
@@ -128,7 +142,7 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
           const enBase = baseFrIndex !== -1
             ? enNames[baseFrIndex].replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase()
             : rawNom.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          const formSuffix = fVal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+          const formSuffix = fVal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/%/g, '').replace(/[^a-z0-9]/g, '_').replace(/_+$/, '');
           const generatedId = `${enBase}_${formSuffix}`;
 
           const key = `${rawNom}__${fVal}`;
@@ -186,7 +200,8 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
       unmatchedFormsSet.add(translation.unmatchedForm);
     }
 
-    const speciesId = translation.id;
+    let speciesId = translation.id;
+    speciesId = resolveGamemasterSpeciesId(speciesId, targetName, isShadow, customForms, metadata?.speciesDexMap);
     if (!speciesId) continue;
 
     const candidate = {
@@ -221,7 +236,8 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
     candidatesBySpecies.get(speciesId).push(candidate);
 
     const currentTranslation = toSpeciesId(row['Nom'], row['Forme'], isShadow, customForms);
-    const currentSpeciesId = currentTranslation.id;
+    let currentSpeciesId = currentTranslation.id;
+    currentSpeciesId = resolveGamemasterSpeciesId(currentSpeciesId, row['Nom'], isShadow, customForms, metadata?.speciesDexMap);
     if (currentSpeciesId) {
       if (!ownedByCurrentSpecies.has(currentSpeciesId)) {
         ownedByCurrentSpecies.set(currentSpeciesId, []);
