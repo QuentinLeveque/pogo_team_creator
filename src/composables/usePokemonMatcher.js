@@ -38,10 +38,72 @@ function buildReverseEvolutionPath(speciesId, familyMap, customForms) {
   return frenchNames.join(' ⇽ ');
 }
 
+function buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedByCurrentSpecies, currentChosen) {
+  if (!familyMap || !speciesId) return [];
+  const cleanId = (id) => id ? id.replace(/_shadow$/, '') : '';
+  let curr = speciesId;
+  const visited = new Set();
+  const chain = [];
+
+  while (curr && !visited.has(curr)) {
+    visited.add(curr);
+    const entry = familyMap[curr] || familyMap[cleanId(curr)];
+    if (!entry || !entry.parent) break;
+    chain.push(entry.parent);
+    curr = entry.parent;
+  }
+
+  // Reverse to get chronological order: base -> intermediate -> target
+  const allIds = [...chain.reverse(), speciesId];
+
+  return allIds.map(stageId => {
+    const cleanStageId = cleanId(stageId);
+    const dexNumber = (speciesDexMap && (speciesDexMap[stageId] || speciesDexMap[cleanStageId])) || 0;
+    const { frenchName } = speciesIdToFrench(stageId, customForms);
+    const isTarget = stageId === speciesId;
+
+    const ownedList = ownedByCurrentSpecies ? (ownedByCurrentSpecies.get(stageId) || ownedByCurrentSpecies.get(cleanStageId) || []) : [];
+    const bestOwned = ownedList.length > 0 ? ownedList[0] : null;
+
+    let isOwned = false;
+    let ownedCandidate = undefined;
+
+    if (bestOwned) {
+      isOwned = true;
+      ownedCandidate = {
+        name: bestOwned.name,
+        ivRankPercent: bestOwned.ivRankPercent || undefined,
+        ivRankNumber: bestOwned.ivRankNumber || undefined,
+        ivAverage: bestOwned.ivAverage || undefined,
+        isCurrent: Boolean(currentChosen && currentChosen.uniqueKey === bestOwned.uniqueKey)
+      };
+    } else if (isTarget && currentChosen && (currentChosen.name || '').toLowerCase() === (frenchName || '').toLowerCase()) {
+      isOwned = true;
+      ownedCandidate = {
+        name: currentChosen.name,
+        ivRankPercent: currentChosen.ivRankPercent || undefined,
+        ivRankNumber: currentChosen.ivRankNumber || undefined,
+        ivAverage: currentChosen.ivAverage || undefined,
+        isCurrent: true
+      };
+    }
+
+    return {
+      speciesId: stageId,
+      dexNumber,
+      nameFr: frenchName || stageId,
+      isTarget,
+      isOwned,
+      ownedCandidate
+    };
+  });
+}
+
 export function matchPokemon(masterList, rankings, league, customForms = {}, eliteMovesMap = {}, metadata = {}) {
   const unmatchedFormsSet = new Set();
   const unmatchedPokemonSet = new Set();
   const candidatesBySpecies = new Map();
+  const ownedByCurrentSpecies = new Map();
 
   const isMaster = league === '10000';
   const suffix = league === '1500' ? ' (G)' : league === '2500' ? ' (U)' : league === '500' ? ' (L)' : '';
@@ -133,11 +195,24 @@ export function matchPokemon(masterList, rankings, league, customForms = {}, eli
       candidatesBySpecies.set(speciesId, []);
     }
     candidatesBySpecies.get(speciesId).push(candidate);
+
+    const currentTranslation = toSpeciesId(row['Nom'], row['Forme'], isShadow, customForms);
+    const currentSpeciesId = currentTranslation.id;
+    if (currentSpeciesId) {
+      if (!ownedByCurrentSpecies.has(currentSpeciesId)) {
+        ownedByCurrentSpecies.set(currentSpeciesId, []);
+      }
+      ownedByCurrentSpecies.get(currentSpeciesId).push(candidate);
+    }
   }
 
   // Sort candidates and select primary specimen per species
   const ownedCandidatesBySpecies = new Map();
   const sortCandidates = (a, b) => isMaster ? (b.ivAverage - a.ivAverage) : (b.ivRankPercent - a.ivRankPercent);
+
+  for (const list of ownedByCurrentSpecies.values()) {
+    list.sort(sortCandidates);
+  }
 
   for (const [speciesId, candidates] of candidatesBySpecies.entries()) {
     const evolvedCandidates = candidates.filter(c => (c.name || '').toLowerCase() === (c.targetEvolvedName || '').toLowerCase());
@@ -238,12 +313,14 @@ function moveMatches(specimenMoves, targetNameFr) {
     const cleanSpeciesId = speciesId ? speciesId.replace(/_shadow$/, '') : '';
     const dexNumber = ranking.dex || speciesDexMap[speciesId] || speciesDexMap[cleanSpeciesId] || (owned ? owned.dexNumber : 0);
     const reverseEvolutionPath = buildReverseEvolutionPath(speciesId, familyMap, customForms);
+    const evolutionLine = buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedByCurrentSpecies, owned);
 
     return {
       meta: {
         speciesId,
         dexNumber,
         reverseEvolutionPath,
+        evolutionLine,
         speciesName: ranking.speciesName,
         nameFr: frenchName,
         score: ranking.score,

@@ -38,7 +38,7 @@
   - `unmatched`: `false`
   - `unmatchedForm`: `null`
 
-- [ ] **Step 1: Écrire le test unitaire pour le suffixe vide dans `tests/nameTranslator.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour le suffixe vide dans `tests/nameTranslator.test.js`**
 
 Dans `tests/nameTranslator.test.js`, ajouter :
 
@@ -54,12 +54,12 @@ it('treats an empty string customForm as an explicit standard base form mapping'
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/nameTranslator.test.js`  
 Résultat attendu : FAIL car actuellement `combinedForms[trimmedForm] !== undefined` concatène `_${suffix}` si `suffix` existe, mais si `suffix === ''`, il faut s'assurer qu'aucun suffixe n'est ajouté et que `unmatched` reste `false`.
 
-- [ ] **Step 3: Mettre à jour `toSpeciesId` dans `electron/services/nameTranslator.js`**
+- [x] **Step 3: Mettre à jour `toSpeciesId` dans `electron/services/nameTranslator.js`**
 
 Dans `electron/services/nameTranslator.js` :
 ```javascript
@@ -78,12 +78,12 @@ Dans `electron/services/nameTranslator.js` :
   }
 ```
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/nameTranslator.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add electron/services/nameTranslator.js tests/nameTranslator.test.js
@@ -108,10 +108,9 @@ git commit -m "feat(translator): support empty suffix mapping to treat custom fo
   - `isOwned: boolean`
   - `ownedCandidate?: { name, ivRankPercent, ivRankNumber, ivAverage, isCurrent }`
 
-- [ ] **Step 1: Écrire le test unitaire pour `evolutionLine` dans `tests/usePokemonMatcher.test.js`**
+- [x] **Step 1: Ajouter le test unitaire pour `evolutionLine` dans `tests/usePokemonMatcher.test.js`**
 
-Dans `tests/usePokemonMatcher.test.js`, ajouter :
-
+Ajouter un test dans `tests/usePokemonMatcher.test.js` :
 ```javascript
 it('builds chronological evolutionLine with sprites, names and ownership details for both owned and unowned stages', () => {
   // L'utilisateur possède un Bulbizarre rang 99.5%
@@ -169,17 +168,27 @@ it('builds chronological evolutionLine with sprites, names and ownership details
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
-Résultat attendu : FAIL car `evolutionLine` n'existe pas encore sur `meta`.
+Résultat attendu : FAIL car `venusaur.meta.evolutionLine` n'est pas encore défini.
 
-- [ ] **Step 3: Implémenter `buildEvolutionLine` dans `src/composables/usePokemonMatcher.js`**
+- [x] **Step 3: Implémenter `buildEvolutionLine` dans `src/composables/usePokemonMatcher.js`**
 
-1. Créer la fonction `buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedCandidatesBySpecies, masterList, league)` :
-   - Remonte la chaîne des parents : `curr = speciesId`, tant que `parent` existe, empiler `curr`.
-   - Inverser le tableau pour aller de la base vers la cible : `allIds = [base, ..., intermediate, target]`.
-   - Pour chaque `id` de la chaîne :
+1. Dans `usePokemonMatcher.js`, ajouter la fonction utilitaire `buildEvolutionLine(speciesId, familyMap, speciesDexMap, customForms, ownedByCurrentSpecies, currentChosen)`.
+2. Pendant le parcours de `masterList`, indexer chaque spécimen par son espèce actuelle réelle (`row['Nom']`) dans `ownedByCurrentSpecies = Map<speciesId, candidate[]>`.
+3. Pour chaque espèce de ranking, appeler `buildEvolutionLine(...)` et l'ajouter à `meta.evolutionLine`.
+
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
+
+Exécuter : `npx vitest run tests/usePokemonMatcher.test.js`  
+Résultat attendu : PASS.
+
+- [x] **Step 5: Commiter les changements**
+```bash
+git add src/composables/usePokemonMatcher.js tests/usePokemonMatcher.test.js
+git commit -m "feat(matcher): construct chronological evolutionLine with ownership badges and sprites"
+```
      - Résoudre `dexNumber`: `speciesDexMap[id] || speciesDexMap[id.replace(/_shadow$/, '')] || 0`.
      - Résoudre `nameFr`: `speciesIdToFrench(id, customForms).frenchName`.
      - Déterminer `isTarget`: `id === speciesId`.

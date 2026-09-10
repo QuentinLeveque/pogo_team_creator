@@ -224,5 +224,60 @@ describe('usePokemonMatcher', () => {
     expect(unmatchedForms.length).toBe(3);
     expect(unmatchedPokemonNames).toEqual(['Deoxys', 'Kyurem']);
   });
+
+  it('builds chronological evolutionLine with sprites, names and ownership details for both owned and unowned stages', () => {
+    // L'utilisateur possède un Bulbizarre rang 99.5%
+    const masterList = [
+      {
+        Nom: 'Bulbizarre', Forme: '', 'Nom (G)': 'Florizarre', 'Forme (G)': 'Normale',
+        'Atq IV': '0', 'Déf IV': '14', 'Rés IV': '15',
+        'Rang % (G)': '99.5%', 'Rang # (G)': '12', 'Coût Poussières (G)': '125000', 'Coût Bonbon (G)': '124',
+        'Niveau Min': '10.0', 'Date Attrapée': '2025-02-01', PC: '500'
+      }
+    ];
+
+    const rankings = [
+      {
+        speciesId: 'venusaur',
+        speciesName: 'Venusaur',
+        score: 91,
+        moveset: ['VINE_WHIP', 'FRENZY_PLANT']
+      }
+    ];
+
+    const speciesDexMap = { venusaur: 3, ivysaur: 2, bulbasaur: 1 };
+    const familyMap = {
+      venusaur: { id: 'FAMILY_BULBASAUR', parent: 'ivysaur' },
+      ivysaur: { id: 'FAMILY_BULBASAUR', parent: 'bulbasaur' },
+      bulbasaur: { id: 'FAMILY_BULBASAUR' }
+    };
+
+    const { matched } = matchPokemon(masterList, rankings, '1500', {}, {}, { speciesDexMap, familyMap });
+    const venusaur = matched[0];
+
+    expect(venusaur.meta.evolutionLine).toBeDefined();
+    expect(venusaur.meta.evolutionLine.length).toBe(3);
+
+    // Ordre chronologique naturel : Bulbizarre ➔ Herbizarre ➔ Florizarre
+    const [stage1, stage2, stage3] = venusaur.meta.evolutionLine;
+
+    expect(stage1.speciesId).toBe('bulbasaur');
+    expect(stage1.nameFr).toBe('Bulbizarre');
+    expect(stage1.dexNumber).toBe(1);
+    expect(stage1.isTarget).toBe(false);
+    expect(stage1.isOwned).toBe(true);
+    expect(stage1.ownedCandidate.ivRankPercent).toBe(99.5);
+
+    expect(stage2.speciesId).toBe('ivysaur');
+    expect(stage2.nameFr).toBe('Herbizarre');
+    expect(stage2.dexNumber).toBe(2);
+    expect(stage2.isTarget).toBe(false);
+    expect(stage2.isOwned).toBe(false);
+
+    expect(stage3.speciesId).toBe('venusaur');
+    expect(stage3.nameFr).toBe('Florizarre');
+    expect(stage3.dexNumber).toBe(3);
+    expect(stage3.isTarget).toBe(true);
+  });
 });
 
