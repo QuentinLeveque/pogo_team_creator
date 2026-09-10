@@ -67,6 +67,8 @@ describe('FormMappingEditor.vue', () => {
 
     // Vérifier la présence du tableau diagnostique
     expect(wrapper.find('.diagnostic-table').exists()).toBe(true);
+    expect(wrapper.find('.dex-tag').exists()).toBe(true);
+    expect(wrapper.find('.dex-tag').text()).toBe('#25');
     expect(wrapper.text()).toContain('Pikachu');
     expect(wrapper.text()).toContain('Costume Fête');
     expect(wrapper.text()).toContain('pikachu_costume_fete');

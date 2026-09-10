@@ -31,7 +31,10 @@
               <td class="pokemon-cell">
                 <PokemonSprite :dex-number="row.dexNumber" />
                 <div class="pokemon-info">
-                  <span class="pokemon-name">{{ row.pokemonNameFr }}</span>
+                  <div class="pokemon-name-line">
+                    <span v-if="row.dexNumber" class="dex-tag">#{{ row.dexNumber }}</span>
+                    <span class="pokemon-name">{{ row.pokemonNameFr }}</span>
+                  </div>
                   <span v-if="row.count" class="specimen-count">{{ row.count }} ex.</span>
                 </div>
               </td>
@@ -303,6 +306,22 @@ async function save() {
 .pokemon-info {
   display: flex;
   flex-direction: column;
+}
+
+.pokemon-name-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dex-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+  background: #F1F5F9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  line-height: 1.2;
 }
 
 .pokemon-name {
