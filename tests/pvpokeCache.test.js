@@ -32,6 +32,17 @@ describe('pvpokeCache', () => {
     expect(translateMove('UNKNOWN_MOVE_XYZ')).toBe('UNKNOWN_MOVE_XYZ');
   });
 
+  it('translates common and special moves from Game Master correctly into French', () => {
+    expect(translateMove('AERIAL_ACE')).toBe('Aéropique');
+    expect(translateMove('AURA_SPHERE')).toBe('Aurasphère');
+    expect(translateMove('WEATHER_BALL_FIRE')).toBe("Ball'Météo (Feu)");
+    expect(translateMove('SACRED_SWORD')).toBe('Lame Sainte');
+    expect(translateMove('ACID_SPRAY')).toBe('Bombe Acide');
+    expect(translateMove('HYDRO_CANNON')).toBe('Hydroblast');
+    expect(translateMove('FRENZY_PLANT')).toBe('Végé-Attaque');
+    expect(translateMove('BLAST_BURN')).toBe('Rafale Feu');
+  });
+
   it('saves and reads rankings from local cache file', async () => {
     const mockRankings = [{ speciesId: 'tinkaton', score: 93 }];
     const cacheFile = path.join(tmpDir, 'cache', 'rankings-1500.json');
