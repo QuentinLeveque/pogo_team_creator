@@ -162,4 +162,79 @@ describe('PokemonRow.vue', () => {
     expect(wrapper.text()).toContain('Salamèche');
     expect(wrapper.text()).toContain('99.8%');
   });
+
+  it('displays visual evolution line with sprites, names and arrows when expanded', async () => {
+    const itemWithEvolutionLine = {
+      meta: {
+        speciesId: 'venusaur',
+        dexNumber: 3,
+        nameFr: 'Florizarre',
+        score: 91,
+        rank: 8,
+        types: ['Plante', 'Poison'],
+        evolutionLine: [
+          {
+            speciesId: 'bulbasaur',
+            dexNumber: 1,
+            nameFr: 'Bulbizarre',
+            isTarget: false,
+            isOwned: true,
+            ownedCandidate: { name: 'Bulbizarre', ivRankPercent: 99.2, ivRankNumber: 15 }
+          },
+          {
+            speciesId: 'ivysaur',
+            dexNumber: 2,
+            nameFr: 'Herbizarre',
+            isTarget: false,
+            isOwned: false
+          },
+          {
+            speciesId: 'venusaur',
+            dexNumber: 3,
+            nameFr: 'Florizarre',
+            isTarget: true,
+            isOwned: true
+          }
+        ],
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [],
+        counters: []
+      },
+      mine: {
+        dexNumber: 3,
+        name: 'Florizarre',
+        ivRankPercent: 88.0,
+        uniqueKey: 'k1'
+      }
+    };
+
+    const wrapper = mount(PokemonRow, {
+      props: { item: itemWithEvolutionLine }
+    });
+
+    // Quand la carte est fermée : pas de lignée visuelle dépliée
+    expect(wrapper.find('.evolution-chain-section').exists()).toBe(false);
+
+    // Déplier la carte
+    await wrapper.find('.row-header').trigger('click');
+    expect(wrapper.find('.evolution-chain-section').exists()).toBe(true);
+
+    // Vérifier la présence des 3 stades avec noms et sprites
+    const stageCards = wrapper.findAll('.stage-card');
+    expect(stageCards.length).toBe(3);
+
+    expect(stageCards[0].text()).toContain('Bulbizarre');
+    expect(stageCards[0].text()).toContain('En stock');
+    expect(stageCards[0].text()).toContain('99.2%');
+
+    expect(stageCards[1].text()).toContain('Herbizarre');
+    expect(stageCards[1].text()).toContain('Non possédé');
+
+    expect(stageCards[2].text()).toContain('Florizarre');
+    expect(stageCards[2].text()).toContain('Cible Ligue');
+
+    // Vérifier la présence des flèches
+    const arrows = wrapper.findAll('.stage-arrow');
+    expect(arrows.length).toBe(2);
+  });
 });

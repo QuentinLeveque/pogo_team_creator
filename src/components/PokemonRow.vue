@@ -72,6 +72,30 @@
 
     <!-- Expanded view -->
     <div v-if="isExpanded" class="expanded-details">
+      <!-- Visual Evolution Line -->
+      <div
+        v-if="item.meta.evolutionLine && item.meta.evolutionLine.length > 1"
+        class="evolution-chain-section"
+      >
+        <h4>Lignée d'évolution</h4>
+        <div class="evolution-stages-track">
+          <template v-for="(stage, idx) in item.meta.evolutionLine" :key="stage.speciesId">
+            <div :class="['stage-card', { 'is-target': stage.isTarget, 'is-owned': stage.isOwned }]">
+              <PokemonSprite :dex-number="stage.dexNumber" :alt="stage.nameFr" class="stage-sprite" />
+              <div class="stage-info">
+                <span class="stage-name">{{ stage.nameFr }}</span>
+                <span v-if="stage.isTarget" class="badge-target">🎯 Cible Ligue #{{ item.meta.rank }}</span>
+                <span v-else-if="stage.isOwned && stage.ownedCandidate" class="badge-owned">
+                  ✅ En stock ({{ stage.ownedCandidate.ivRankPercent ? `Rang ${stage.ownedCandidate.ivRankPercent.toFixed(1)}%` : `IV ${stage.ownedCandidate.ivAverage?.toFixed(1)}%` }})
+                </span>
+                <span v-else class="badge-missing">❌ Non possédé</span>
+              </div>
+            </div>
+            <span v-if="idx < item.meta.evolutionLine.length - 1" class="stage-arrow">➔</span>
+          </template>
+        </div>
+      </div>
+
       <!-- Side-by-side comparison if better unevolved candidate exists -->
       <div v-if="item.mine?.betterUnevolvedCandidate" class="comparison-section">
         <h4>Arbitrage : Spécimen Actuel vs Candidat Supérieur</h4>
@@ -536,5 +560,112 @@ function getTypeColor(t) {
 }
 .remove-btn:hover {
   background: #FFF5F5;
+}
+
+/* Evolution Chain Section */
+.evolution-chain-section {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.evolution-chain-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.evolution-stages-track {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.stage-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  min-width: 160px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.stage-card.is-target {
+  border-color: #93C5FD;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 1px #BFDBFE;
+}
+
+.stage-card.is-owned:not(.is-target) {
+  border-color: #A7F3D0;
+  background: #F0FDF4;
+}
+
+.stage-sprite {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stage-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.badge-target {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1D4ED8;
+  background: #DBEAFE;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.badge-owned {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #047857;
+  background: #DCFCE7;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.badge-missing {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748B;
+  background: #F1F5F9;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.stage-arrow {
+  color: #94A3B8;
+  font-size: 1rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  user-select: none;
 }
 </style>

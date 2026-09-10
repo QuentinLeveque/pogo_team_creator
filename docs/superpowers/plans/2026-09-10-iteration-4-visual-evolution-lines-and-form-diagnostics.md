@@ -414,7 +414,7 @@ git commit -m "feat(ui): add diagnostic table with quick standard form action in
   - Section `.evolution-chain-section` visible uniquement quand `isExpanded === true` et `evolutionLine.length > 1`.
   - Piste horizontale défilable avec chaque stade d'évolution : `<PokemonSprite>`, nom français, badge de statut (`🎯 Cible Ligue`, `✅ En stock`, `❌ Non possédé`), et séparateurs `➔`.
 
-- [ ] **Step 1: Écrire le test unitaire pour la lignée d'évolution dépliée dans `tests/components/PokemonRow.test.js`**
+- [x] **Step 1: Écrire le test unitaire pour la lignée d'évolution dépliée dans `tests/components/PokemonRow.test.js`**
 
 Dans `tests/components/PokemonRow.test.js`, ajouter :
 
@@ -495,12 +495,12 @@ it('displays visual evolution line with sprites, names and arrows when expanded'
 });
 ```
 
-- [ ] **Step 2: Exécuter le test pour vérifier son échec**
+- [x] **Step 2: Exécuter le test pour vérifier son échec**
 
 Exécuter : `npx vitest run tests/components/PokemonRow.test.js`  
 Résultat attendu : FAIL car `.evolution-chain-section` n'existe pas encore.
 
-- [ ] **Step 3: Implémenter la section de lignée d'évolution dans `src/components/PokemonRow.vue`**
+- [x] **Step 3: Implémenter la section de lignée d'évolution dans `src/components/PokemonRow.vue`**
 
 1. Dans `src/components/PokemonRow.vue`, dans `.expanded-details`, insérer la section `.evolution-chain-section` :
    ```html
@@ -529,12 +529,12 @@ Résultat attendu : FAIL car `.evolution-chain-section` n'existe pas encore.
    ```
 2. Styliser `.evolution-chain-section`, `.evolution-stages-track`, `.stage-card`, `.stage-arrow`, et les badges.
 
-- [ ] **Step 4: Exécuter le test pour vérifier son succès**
+- [x] **Step 4: Exécuter le test pour vérifier son succès**
 
 Exécuter : `npx vitest run tests/components/PokemonRow.test.js`  
 Résultat attendu : PASS.
 
-- [ ] **Step 5: Commiter les changements**
+- [x] **Step 5: Commiter les changements**
 
 ```bash
 git add src/components/PokemonRow.vue tests/components/PokemonRow.test.js
