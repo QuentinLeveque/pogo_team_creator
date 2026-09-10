@@ -29,6 +29,45 @@
         {{ successMessage }}
       </div>
 
+      <div v-if="appStore.importHistory.length > 0" class="importer-history-section">
+        <div class="importer-history-header">
+          <span class="importer-history-title">Fichiers actuellement appliqués ({{ appStore.importHistory.length }})</span>
+          <button
+            type="button"
+            class="clear-all-csv-btn"
+            @click="showClearAllModal = true"
+          >
+            Tout effacer
+          </button>
+        </div>
+        <div class="importer-history-list">
+          <div v-for="item in appStore.importHistory" :key="item.id" class="importer-history-row">
+            <span class="importer-history-filename">{{ item.originalFilename }}</span>
+            <span class="importer-history-count">{{ Number(item.pokemonCountInFile || 0).toLocaleString('fr-FR') }} Pokémon</span>
+            <button
+              type="button"
+              class="delete-csv-btn"
+              title="Supprimer ce fichier"
+              @click="handleDeleteFile(item.id)"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clear All Confirmation Modal -->
+      <div v-if="showClearAllModal" class="confirm-backdrop">
+        <div class="confirm-modal-box">
+          <h4>Supprimer toutes les données ?</h4>
+          <p>Cette action supprimera tous les fichiers CSV importés, l'historique complet et réinitialisera votre collection de Pokémon. Cette action est irréversible.</p>
+          <div class="confirm-modal-actions">
+            <button type="button" class="btn-cancel" @click="showClearAllModal = false">Annuler</button>
+            <button type="button" class="confirm-delete-btn" @click="handleClearAll">Confirmer la suppression</button>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button class="cancel-btn" @click="close">Fermer</button>
       </div>
@@ -47,11 +86,46 @@ const pokemonStore = usePokemonStore();
 const isDragging = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+const showClearAllModal = ref(false);
 
 function close() {
   appStore.isImporterOpen = false;
   errorMessage.value = '';
   successMessage.value = '';
+  showClearAllModal.value = false;
+}
+
+async function handleDeleteFile(id) {
+  if (typeof window === 'undefined' || !window.electronAPI) return;
+  errorMessage.value = '';
+  successMessage.value = '';
+  try {
+    const res = await window.electronAPI.removeCsvFile(id);
+    if (res && res.success) {
+      appStore.importHistory = res.history || [];
+      successMessage.value = `Fichier supprimé. Collection mise à jour (${res.totalCount} Pokémon restants).`;
+      await pokemonStore.loadData();
+    }
+  } catch (err) {
+    errorMessage.value = err.message || 'Erreur lors de la suppression';
+  }
+}
+
+async function handleClearAll() {
+  if (typeof window === 'undefined' || !window.electronAPI) return;
+  errorMessage.value = '';
+  successMessage.value = '';
+  try {
+    const res = await window.electronAPI.removeAllCsvs();
+    if (res && res.success) {
+      appStore.importHistory = [];
+      showClearAllModal.value = false;
+      successMessage.value = 'Toutes les données CSV et la collection ont été supprimées.';
+      await pokemonStore.loadData();
+    }
+  } catch (err) {
+    errorMessage.value = err.message || 'Erreur lors de la réinitialisation';
+  }
 }
 
 async function processFile(file) {
@@ -173,5 +247,132 @@ function handleFileSelect(e) {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+.importer-history-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid #E2E8F0;
+  padding-top: 1rem;
+}
+.importer-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.importer-history-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4A5568;
+}
+.clear-all-csv-btn {
+  background: none;
+  border: 1px solid #FED7D7;
+  color: #E53E3E;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.clear-all-csv-btn:hover {
+  background: #FFF5F5;
+  border-color: #FEB2B2;
+}
+.importer-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.importer-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
+.importer-history-filename {
+  font-weight: 500;
+  color: #1A202C;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.importer-history-count {
+  color: #718096;
+  font-size: 0.75rem;
+  margin: 0 0.75rem;
+}
+.delete-csv-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.1rem 0.3rem;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+}
+.delete-csv-btn:hover {
+  opacity: 1;
+}
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+}
+.confirm-modal-box {
+  background: #FFFFFF;
+  border-radius: 10px;
+  width: 420px;
+  max-width: 90%;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+.confirm-modal-box h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.05rem;
+  color: #991B1B;
+}
+.confirm-modal-box p {
+  font-size: 0.85rem;
+  color: #4A5568;
+  line-height: 1.4;
+  margin: 0 0 1.25rem 0;
+}
+.confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.btn-cancel {
+  padding: 0.5rem 0.9rem;
+  background: #E2E8F0;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.confirm-delete-btn {
+  padding: 0.5rem 0.9rem;
+  background: #DC2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.confirm-delete-btn:hover {
+  background: #B91C1C;
 }
 </style>

@@ -18,8 +18,8 @@ describe('PokemonRow.vue', () => {
           { moveId: 'DRAGON_CLAW', nameFr: 'Draco-Griffe', isElite: false, isKnown: true, toString() { return 'Draco-Griffe'; } }
         ]
       },
-      matchups: [{ opponentNameFr: 'Tinkaton', rating: 650 }],
-      counters: [{ opponentNameFr: 'Quagsire (Obs)', rating: 350 }]
+      matchups: [{ opponent: 'tinkaton', opponentNameFr: 'Tinkaton', dexNumber: 959, rating: 650 }],
+      counters: [{ opponent: 'quagsire_shadow', opponentNameFr: 'Maraiste (Obs)', dexNumber: 195, rating: 350 }]
     },
     mine: {
       dexNumber: 6,
@@ -38,6 +38,14 @@ describe('PokemonRow.vue', () => {
       candyCost: 16,
       xlCandyCost: 0,
       requiresXl: false,
+      fastMove: 'Cru-Ailes',
+      chargedMove1: 'Lance-Flammes',
+      chargedMove2: 'Rafale Feu',
+      mineMoves: {
+        fast: { nameFr: 'Cru-Ailes', isElite: true },
+        charged1: { nameFr: 'Lance-Flammes', isElite: false },
+        charged2: { nameFr: 'Rafale Feu', isElite: true }
+      },
       isAlreadyEvolved: true,
       needsEvolution: false,
       betterUnevolvedCandidate: {
@@ -142,7 +150,7 @@ describe('PokemonRow.vue', () => {
     expect(wrapper.text()).toContain('80 XL');
   });
 
-  it('toggles expansion and shows move badges and side-by-side comparison', async () => {
+  it('toggles expansion and shows 2-column moves overhaul without any CT badges', async () => {
     const wrapper = mount(PokemonRow, {
       props: { item }
     });
@@ -151,16 +159,73 @@ describe('PokemonRow.vue', () => {
     await wrapper.find('.row-header').trigger('click');
     expect(wrapper.find('.expanded-details').exists()).toBe(true);
 
-    // Moves with elite & known indicators
+    // Two column headers
+    expect(wrapper.text()).toContain('Recommandées (PvPoke)');
+    expect(wrapper.text()).toContain('Actuelles de mon Pokémon');
+
+    // Moves names from both columns
     expect(wrapper.text()).toContain('Cru-Ailes');
     expect(wrapper.text()).toContain('Rafale Feu');
     expect(wrapper.text()).toContain('Draco-Griffe');
-    expect(wrapper.text()).toContain('CT Élite requise');
+    expect(wrapper.text()).toContain('Lance-Flammes');
+
+    // Elite badges shown
+    expect(wrapper.text()).toContain('⭐ Élite');
+
+    // Completely removed obsolete CT badges
+    expect(wrapper.text()).not.toContain('CT requise');
+    expect(wrapper.text()).not.toContain('CT Élite requise');
+    expect(wrapper.text()).not.toContain('✓ Connue');
 
     // Comparison block
     expect(wrapper.find('.comparison-section').exists()).toBe(true);
     expect(wrapper.text()).toContain('Salamèche');
     expect(wrapper.text()).toContain('99.8%');
+  });
+
+  it('renders shadow badge on row header when meta.isShadow is true even if unowned', () => {
+    const shadowUnownedItem = {
+      meta: {
+        speciesId: 'ninetales_shadow',
+        dexNumber: 38,
+        nameFr: 'Feunard (Obscur)',
+        score: 95,
+        rank: 2,
+        isShadow: true,
+        types: ['Feu'],
+        recommendedMoveset: { fast: {}, charged: [] },
+        matchups: [],
+        counters: []
+      },
+      mine: null
+    };
+
+    const wrapper = mount(PokemonRow, {
+      props: { item: shadowUnownedItem }
+    });
+
+    const shadowBadge = wrapper.find('.shadow-badge');
+    expect(shadowBadge.exists()).toBe(true);
+    expect(shadowBadge.text()).toBe('Obscur');
+    expect(wrapper.classes()).toContain('shadow');
+  });
+
+  it('renders key matchups and counters as visual chips with sprites', async () => {
+    const wrapper = mount(PokemonRow, {
+      props: { item }
+    });
+
+    await wrapper.find('.row-header').trigger('click');
+
+    const matchupChips = wrapper.findAll('.matchup-chip');
+    expect(matchupChips.length).toBe(2);
+
+    expect(wrapper.text()).toContain('Victoires clés');
+    expect(wrapper.text()).toContain('Contres clés');
+    expect(wrapper.text()).toContain('Tinkaton');
+    expect(wrapper.text()).toContain('Maraiste (Obs)');
+    expect(wrapper.text()).toContain('650');
+    expect(wrapper.text()).toContain('350');
   });
 
   it('displays visual evolution line with sprites, names and arrows when expanded', async () => {

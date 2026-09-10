@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import AppSidebar from '../../src/components/AppSidebar.vue';
 import { useAppStore } from '../../src/stores/appStore.js';
@@ -47,5 +47,60 @@ describe('AppSidebar.vue', () => {
 
     await refreshBtn.trigger('click');
     expect(pokemonStore.refreshPvpoke).toHaveBeenCalled();
+  });
+
+  it('allows deleting an individual CSV file and calls removeCsvFile', async () => {
+    const appStore = useAppStore();
+    const pokemonStore = usePokemonStore();
+    pokemonStore.loadData = vi.fn().mockResolvedValue();
+
+    appStore.importHistory = [
+      { id: 'f1', originalFilename: 'file1.csv', importedAt: '2026-09-09', pokemonCountInFile: 10, newPokemonAdded: 10 }
+    ];
+
+    window.electronAPI = {
+      removeCsvFile: vi.fn().mockResolvedValue({ success: true, totalCount: 0, history: [] })
+    };
+
+    const wrapper = mount(AppSidebar);
+    const deleteBtn = wrapper.find('.delete-csv-btn');
+    expect(deleteBtn.exists()).toBe(true);
+
+    await deleteBtn.trigger('click');
+    expect(window.electronAPI.removeCsvFile).toHaveBeenCalledWith('f1');
+    expect(pokemonStore.loadData).toHaveBeenCalled();
+  });
+
+  it('displays confirmation modal on "Tout effacer" and calls removeAllCsvs on confirmation', async () => {
+    const appStore = useAppStore();
+    const pokemonStore = usePokemonStore();
+    pokemonStore.loadData = vi.fn().mockResolvedValue();
+
+    appStore.importHistory = [
+      { id: 'f1', originalFilename: 'file1.csv', importedAt: '2026-09-09', pokemonCountInFile: 10, newPokemonAdded: 10 }
+    ];
+
+    window.electronAPI = {
+      removeAllCsvs: vi.fn().mockResolvedValue({ success: true, totalCount: 0, history: [] })
+    };
+
+    const wrapper = mount(AppSidebar);
+    const clearAllBtn = wrapper.find('.clear-all-csv-btn');
+    expect(clearAllBtn.exists()).toBe(true);
+
+    // Modal not open initially
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(false);
+
+    await clearAllBtn.trigger('click');
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(true);
+
+    // Click confirm in modal
+    const confirmBtn = wrapper.find('.confirm-delete-btn');
+    await confirmBtn.trigger('click');
+    await flushPromises();
+
+    expect(window.electronAPI.removeAllCsvs).toHaveBeenCalled();
+    expect(pokemonStore.loadData).toHaveBeenCalled();
+    expect(wrapper.find('.confirm-modal-box').exists()).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 <template>
-  <div :class="['pokemon-row-card', { shadow: item.mine?.isShadow, expanded: isExpanded }]">
+  <div :class="['pokemon-row-card', { shadow: item.mine?.isShadow || item.meta?.isShadow, expanded: isExpanded }]">
     <div class="row-header" @click="isExpanded = !isExpanded">
       <div class="rank-badge">#{{ item.meta.rank }}</div>
 
@@ -16,7 +16,7 @@
         <div class="name-line">
           <span class="pokemon-name">{{ item.meta.nameFr }}</span>
           <span v-if="item.mine?.form" class="form-badge">{{ item.mine.form }}</span>
-          <span v-if="item.mine?.isShadow" class="shadow-badge">Obscur</span>
+          <span v-if="item.mine?.isShadow || item.meta?.isShadow" class="shadow-badge">Obscur</span>
           <span v-if="item.mine?.isLucky" class="lucky-badge">✨ Chanceux</span>
           <span v-if="item.mine?.needsEvolution" class="evo-badge">Évolution requise</span>
         </div>
@@ -145,43 +145,87 @@
           </p>
         </div>
 
-        <div class="detail-section">
-          <h4>MOVES RECOMMANDÉS</h4>
-          <div class="moves-list">
-            <div v-if="item.meta.recommendedMoveset.fast" class="move-badge-item">
-              <span class="move-icon">⚡</span>
-              <span class="move-name">{{ item.meta.recommendedMoveset.fast.nameFr || item.meta.recommendedMoveset.fast }}</span>
-              <span v-if="item.meta.recommendedMoveset.fast.isElite" class="elite-pill">⭐ Élite</span>
-              <span
-                v-if="item.mine"
-                :class="['move-status', item.meta.recommendedMoveset.fast.isKnown ? 'known' : 'needs-tm']"
-              >
-                {{ item.meta.recommendedMoveset.fast.isKnown ? '✓ Connue' : (item.meta.recommendedMoveset.fast.isElite ? 'CT Élite requise' : 'CT requise') }}
-              </span>
+        <div class="detail-section moves-section">
+          <h4>ATTAQUES</h4>
+          <div class="moves-comparison-grid">
+            <div class="moves-col">
+              <div class="moves-col-header">Recommandées (PvPoke)</div>
+              <div class="moves-list">
+                <div v-if="item.meta.recommendedMoveset.fast" class="move-badge-item">
+                  <span class="move-icon">⚡</span>
+                  <span class="move-name">{{ item.meta.recommendedMoveset.fast.nameFr || item.meta.recommendedMoveset.fast }}</span>
+                  <span v-if="item.meta.recommendedMoveset.fast.isElite" class="elite-pill">⭐ Élite</span>
+                </div>
+                <div
+                  v-for="cm in (Array.isArray(item.meta.recommendedMoveset.charged) ? item.meta.recommendedMoveset.charged : [])"
+                  :key="cm.moveId || cm"
+                  class="move-badge-item"
+                >
+                  <span class="move-icon">💥</span>
+                  <span class="move-name">{{ cm.nameFr || cm }}</span>
+                  <span v-if="cm.isElite" class="elite-pill">⭐ Élite</span>
+                </div>
+              </div>
             </div>
 
-            <div
-              v-for="cm in (Array.isArray(item.meta.recommendedMoveset.charged) ? item.meta.recommendedMoveset.charged : [])"
-              :key="cm.moveId || cm"
-              class="move-badge-item"
-            >
-              <span class="move-icon">💥</span>
-              <span class="move-name">{{ cm.nameFr || cm }}</span>
-              <span v-if="cm.isElite" class="elite-pill">⭐ Élite</span>
-              <span
-                v-if="item.mine"
-                :class="['move-status', cm.isKnown ? 'known' : 'needs-tm']"
-              >
-                {{ cm.isKnown ? '✓ Connue' : (cm.isElite ? 'CT Élite requise' : 'CT requise') }}
-              </span>
+            <div class="moves-col">
+              <div class="moves-col-header">Actuelles de mon Pokémon</div>
+              <div v-if="item.mine" class="moves-list">
+                <div class="move-badge-item">
+                  <span class="move-icon">⚡</span>
+                  <span class="move-name">{{ item.mine.mineMoves?.fast?.nameFr || item.mine.fastMove || '—' }}</span>
+                  <span v-if="item.mine.mineMoves?.fast?.isElite" class="elite-pill">⭐ Élite</span>
+                </div>
+                <div class="move-badge-item">
+                  <span class="move-icon">💥</span>
+                  <span class="move-name">{{ item.mine.mineMoves?.charged1?.nameFr || item.mine.chargedMove1 || '—' }}</span>
+                  <span v-if="item.mine.mineMoves?.charged1?.isElite" class="elite-pill">⭐ Élite</span>
+                </div>
+                <div class="move-badge-item">
+                  <span class="move-icon">💥</span>
+                  <span v-if="item.mine.mineMoves?.charged2?.nameFr || item.mine.chargedMove2" class="move-name">
+                    {{ item.mine.mineMoves?.charged2?.nameFr || item.mine.chargedMove2 }}
+                  </span>
+                  <span v-else class="move-placeholder">
+                    — (2ème attaque non débloquée)
+                  </span>
+                  <span v-if="item.mine.mineMoves?.charged2?.isElite" class="elite-pill">⭐ Élite</span>
+                </div>
+              </div>
+              <div v-else class="not-owned-moves">
+                Non possédé
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="detail-section">
+        <div class="detail-section matchups-section">
           <h4>MATCHUPS CLÉS</h4>
-          <p><strong>Victoires :</strong> {{ item.meta.matchups.map(m => m.opponentNameFr).join(', ') || 'N/A' }}</p>
-          <p><strong>Contres :</strong> {{ item.meta.counters.map(c => c.opponentNameFr).join(', ') || 'N/A' }}</p>
+          <div class="matchups-grid">
+            <div class="matchup-category">
+              <span class="matchup-cat-label win">Victoires clés</span>
+              <div v-if="item.meta.matchups && item.meta.matchups.length > 0" class="chips-list">
+                <div v-for="m in item.meta.matchups" :key="m.opponent" class="matchup-chip win">
+                  <PokemonSprite :dex-number="m.dexNumber" :alt="m.opponentNameFr" class="chip-sprite" />
+                  <span class="chip-name">{{ m.opponentNameFr }}</span>
+                  <span v-if="m.rating" class="chip-rating">{{ m.rating }}</span>
+                </div>
+              </div>
+              <span v-else class="no-matchup">N/A</span>
+            </div>
+
+            <div class="matchup-category">
+              <span class="matchup-cat-label loss">Contres clés</span>
+              <div v-if="item.meta.counters && item.meta.counters.length > 0" class="chips-list">
+                <div v-for="c in item.meta.counters" :key="c.opponent" class="matchup-chip loss">
+                  <PokemonSprite :dex-number="c.dexNumber" :alt="c.opponentNameFr" class="chip-sprite" />
+                  <span class="chip-name">{{ c.opponentNameFr }}</span>
+                  <span v-if="c.rating" class="chip-rating">{{ c.rating }}</span>
+                </div>
+              </div>
+              <span v-else class="no-matchup">N/A</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -495,7 +539,33 @@ function getTypeColor(t) {
   margin-left: 0.25rem;
 }
 
-/* Moves list */
+/* Moves section */
+.moves-section {
+  grid-column: span 2;
+}
+@media (max-width: 768px) {
+  .moves-section {
+    grid-column: span 1;
+  }
+}
+.moves-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 600px) {
+  .moves-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.moves-col-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+  margin-bottom: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 .moves-list {
   display: flex;
   flex-direction: column;
@@ -509,7 +579,7 @@ function getTypeColor(t) {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 6px;
-  padding: 0.3rem 0.5rem;
+  padding: 0.35rem 0.5rem;
 }
 .move-icon {
   font-size: 0.85rem;
@@ -517,6 +587,17 @@ function getTypeColor(t) {
 .move-name {
   font-weight: 600;
   color: #1A202C;
+}
+.move-placeholder {
+  color: #94A3B8;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+.not-owned-moves {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  font-style: italic;
+  padding: 0.4rem 0;
 }
 .elite-pill {
   font-size: 0.65rem;
@@ -526,21 +607,91 @@ function getTypeColor(t) {
   border: 1px solid #FCD34D;
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
-}
-.move-status {
   margin-left: auto;
-  font-size: 0.7rem;
+}
+
+/* Matchups section */
+.matchups-section {
+  grid-column: span 2;
+}
+@media (max-width: 768px) {
+  .matchups-section {
+    grid-column: span 1;
+  }
+}
+.matchups-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 600px) {
+  .matchups-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.matchup-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.matchup-cat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.matchup-cat-label.win {
+  color: #059669;
+}
+.matchup-cat-label.loss {
+  color: #DC2626;
+}
+.chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.matchup-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  transition: all 0.15s ease;
+}
+.matchup-chip.win {
+  border-color: #A7F3D0;
+  background: #F0FDF4;
+}
+.matchup-chip.loss {
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+.chip-sprite {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.chip-name {
   font-weight: 600;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  color: #1F2937;
 }
-.move-status.known {
-  background: #DCFCE7;
-  color: #15803D;
+.chip-rating {
+  font-size: 0.7rem;
+  color: #6B7280;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.05rem 0.25rem;
+  border-radius: 3px;
+  font-weight: 500;
 }
-.move-status.needs-tm {
-  background: #FFEDD5;
-  color: #C2410C;
+.no-matchup {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  font-style: italic;
 }
 
 .expanded-actions {
