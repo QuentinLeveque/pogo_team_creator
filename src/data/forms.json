@@ -40,7 +40,11 @@
     "Céleste": "sky",
     "Terrestre": "land",
     "Femelle": "female",
+    "Masculin": "",
     "Plante": "plant",
     "Sable": "sand",
-    "Cape Déchet": "trash"
+    "Cape Déchet": "trash",
+    "Paldea": "paldean",
+    "Flamenco": "baile",
+    "Maxi": "large"
 }
