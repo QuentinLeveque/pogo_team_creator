@@ -6,41 +6,20 @@
 
 ## 🌟 Fonctionnalités Principales
 
-- **📥 Gestion & Fusion Multi-CSV (Bibliothèque PokeGenie)** :
-  - Importez un ou plusieurs fichiers d'export PokeGenie (CSV).
-  - Fusion intelligente et déduplication automatique des Pokémon basée sur les attributs uniques (IVs, forme, date de capture).
-  - Suppression individuelle par fichier avec modale de confirmation ou réinitialisation complète (« Tout effacer »).
-  - Export de la collection fusionnée et nettoyée.
+- **📥 Bibliothèque Multi-CSV** : Import, fusion intelligente et déduplication automatique de vos exports PokeGenie.
+- **🏆 Méta PvPoke** : Classements compétitifs pour les 4 ligues (Super 1500, Hyper 2500, Master et Petite 500).
+- **⚡ Zéro Latence (0 ms)** : Architecture cache-first locale et préchargement transparent en arrière-plan pour un basculement instantané.
+- **🟣 Spécialisation Obscurs** : Badges violets dédiés et isolation stricte entre spécimens normaux et obscurs.
+- **⚔️ Analyse des Attaques** : Comparatif côte à côte (PvPoke vs vos attaques), détection des attaques nécessitant une CT d'élite (`⭐ Élite`) et noms en français.
+- **💎 Coûts & Filtre XL** : Calcul précis de la poussière d'étoiles, bonbons et bonbons XL requis, avec filtre rapide sans XL.
+- **🔍 Gestion des Formes** : Outil interactif pour associer les formes événementielles ou méconnues à leur variante standard.
+- **🔒 100% Local & Hors-Ligne** : Aucune télémétrie, traitement et stockage entièrement sur votre machine.
 
-- **🏆 Classements PvPoke & Détection de Méta** :
-  - Intégration complète des 4 ligues majeures : **Ligue Super (1500 PC)**, **Ligue Hyper (2500 PC)**, **Ligue Master (Sans limite)** et **Ligue Petite (500 PC)**.
-  - Basculement entre la vue **« Mes Pokémon »** (vos spécimens qualifiés dans le méta) et **« Méta complète »** (l'ensemble des meilleurs Pokémon de la ligue).
+---
 
-- **⚡ Performance Extrême & Basculement Instantané (0 ms)** :
-  - Architecture **Cache-First** : données PvPoke stockées localement pour un démarrage hors-ligne immédiat sans freeze réseau.
-  - Algorithme de matching optimisé en **O(1)** via des tables de hachage précalculées.
-  - **Préchargement silencieux en arrière-plan** : dès l'ouverture, toutes les ligues sont pré-calculées sans impacter la fluidité de l'interface, rendant chaque changement de ligue instantané.
+## 🤖 Développement
 
-- **🟣 Spécialisation des Pokémon Obscurs** :
-  - Isolation stricte entre Pokémon normaux et obscurs (aucun risque de faux positifs dans les classements).
-  - Badges visuels violets dédiés `Obscur` dans toute l'interface.
-  - Arbre d'évolution obscur cohérent (ex. *Goupix (Obscur) ➔ Feunard (Obscur)*).
-
-- **⚔️ Comparatif d'Attaques & Badges Attaques d'Élite** :
-  - Présentation en deux colonnes : **Attaques recommandées PvPoke** vs **Attaques actuelles de votre Pokémon**.
-  - Détection automatique et affichage des badges **`⭐ Élite`** pour les attaques nécessitant une CT d'élite.
-  - Dictionnaire officiel intégrant plus de 350 attaques traduites en français.
-
-- **💎 Calculateur de Coûts & Filtre Bonbons XL** :
-  - Estimation exacte de la Poussière d'étoiles, des Bonbons et des Bonbons XL nécessaires pour atteindre le niveau cible.
-  - Bouton filtre universel **`🔷 Sans bonbons XL`** pour écarter instantanément les Pokémon et espèces méta nécessitant un niveau > 40.
-
-- **🔍 Éditeur & Diagnostic des Formes Méconnues** :
-  - Panneau interactif signalant les formes événementielles ou non répertoriées (ex. costumes, formes régionales).
-  - Possibilité de mapper facilement une forme personnalisée vers sa variante PvPoke standard.
-
-- **🔒 100% Local & Respectueux de la Vie Privée** :
-  - Aucune télémétrie, aucun compte requis, aucun envoi de données externes. Tout est stocké et calculé localement sur votre ordinateur.
+> Ce projet a été intégralement conçu et développé avec **Google Gemini**.
 
 ---
 
@@ -122,5 +101,13 @@ pogo_team_creator/
 
 ---
 
-## 📄 Licence
-Ce projet est sous licence libre. Les données de classements et de Game Master sont fournies sous l'égide de [PvPoke](https://pvpoke.com/).
+## 📄 Licence & Mentions Légales
+
+### Licence
+Ce projet est open-source et distribué sous licence **MIT** (voir le fichier [`LICENSE`](file:///home/quentin/Documents/script/pogo_team_creator/LICENSE)).
+
+### Mentions Légales & Crédits
+- **Pokémon** et les noms associés sont des marques déposées de **Nintendo**, **Creatures Inc.** et **GAME FREAK Inc.** / **The Pokémon Company**.
+- Ce projet est un outil créé par des fans à des fins non commerciales et n'est ni affilié ni approuvé par Niantic, Nintendo ou The Pokémon Company.
+- Les données de classements et du Game Master proviennent de [PvPoke](https://pvpoke.com/).
+- Les sprites officiels sont fournis par [PokeAPI](https://pokeapi.co/).
