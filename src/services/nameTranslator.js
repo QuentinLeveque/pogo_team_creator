@@ -16,13 +16,26 @@ function normalizeFormKey(str) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+const frNameToIndex = new Map();
+frNames.forEach((name, i) => {
+  if (name) frNameToIndex.set(name.toLowerCase(), i);
+});
+
+const enToFrIndex = new Map();
+enNames.forEach((name, i) => {
+  if (name) {
+    const key = name.replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase();
+    enToFrIndex.set(key, i);
+  }
+});
+
 export function toSpeciesId(frenchName, form, isShadow = false, customForms = {}) {
   if (!frenchName) {
     return { id: '', unmatched: false, unmatchedForm: null };
   }
 
   const cleanFrName = normalizeName(frenchName);
-  const frIndex = frNames.findIndex(n => n.toLowerCase() === cleanFrName);
+  const frIndex = frNameToIndex.has(cleanFrName) ? frNameToIndex.get(cleanFrName) : -1;
 
   if (frIndex === -1) {
     return { id: cleanFrName.replace(/ /g, '_'), unmatched: false, unmatchedForm: null };
@@ -89,12 +102,7 @@ export function speciesIdToFrench(speciesId, customForms = {}) {
     }
   }
 
-  // Look up base english name in enNames
-  const normalizedEnNames = enNames.map(name =>
-    name.replace(/ /g, '_').replace(/-/g, '_').replace(/\. /g, '_').replace(/\./g, '_').toLowerCase()
-  );
-
-  const foundIndex = normalizedEnNames.indexOf(cleanId);
+  const foundIndex = enToFrIndex.has(cleanId) ? enToFrIndex.get(cleanId) : -1;
   let frenchName = cleanId;
   if (foundIndex !== -1 && frNames[foundIndex]) {
     frenchName = frNames[foundIndex];

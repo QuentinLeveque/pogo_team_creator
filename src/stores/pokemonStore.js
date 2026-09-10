@@ -94,6 +94,7 @@ export const usePokemonStore = defineStore('pokemon', {
 
     async changeLeague(leagueId) {
       const appStore = useAppStore();
+      if (appStore.activeLeague === leagueId && this.rawMatched.length > 0) return;
       appStore.setLeague(leagueId);
 
       // If base data not yet loaded, perform full loadData
@@ -101,21 +102,19 @@ export const usePokemonStore = defineStore('pokemon', {
         return await this.loadData();
       }
 
-      // If rankings for this league are already in memory, match instantly!
-      if (this.cachedRankings[leagueId]) {
-        this.runMatching(leagueId);
-        return;
-      }
-
-      // Otherwise fetch only the rankings for this league
       this.isLoading = true;
       this.error = null;
+      // Allow UI thread to display active tab and loading spinner immediately
+      await new Promise(resolve => setTimeout(resolve, 15));
+
       try {
-        if (typeof window !== 'undefined' && window.electronAPI?.getRankings) {
-          const rankingsRes = await window.electronAPI.getRankings(leagueId);
-          this.cachedRankings[leagueId] = rankingsRes;
-          this.runMatching(leagueId);
+        if (!this.cachedRankings[leagueId]) {
+          if (typeof window !== 'undefined' && window.electronAPI?.getRankings) {
+            const rankingsRes = await window.electronAPI.getRankings(leagueId);
+            this.cachedRankings[leagueId] = rankingsRes;
+          }
         }
+        this.runMatching(leagueId);
       } catch (err) {
         this.error = err.message || 'Erreur de chargement des classements';
       } finally {

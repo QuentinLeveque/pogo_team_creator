@@ -15,7 +15,7 @@ function parseNumber(val) {
 }
 
 function resolveGamemasterSpeciesId(speciesId, rawNom, isShadow, customForms, speciesDexMap) {
-  if (!speciesId || !speciesDexMap || Object.keys(speciesDexMap).length === 0) return speciesId;
+  if (!speciesId || !speciesDexMap) return speciesId;
   const clean = speciesId.replace(/_shadow$/, '');
   if (speciesDexMap[clean] || speciesDexMap[speciesId]) {
     return speciesId;

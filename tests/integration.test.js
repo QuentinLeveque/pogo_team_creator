@@ -154,4 +154,20 @@ describe('Real-world Data Integration Test', () => {
       expect(sample.count).toBeGreaterThan(0);
     }
   });
+
+  it('benchmarks matching 1831 pokemon against 844 rankings under 500ms', () => {
+    const masterPath = path.join(process.env.HOME, '.config/pogo-team-creator/csv-library/master.json');
+    if (!fs.existsSync(masterPath)) return;
+    const master = JSON.parse(fs.readFileSync(masterPath, 'utf-8'));
+    const rankingsPath = path.join(process.env.HOME, '.config/pogo-team-creator/cache/rankings-2500.json');
+    if (!fs.existsSync(rankingsPath)) return;
+    const rankings = JSON.parse(fs.readFileSync(rankingsPath, 'utf-8'));
+
+    const start = performance.now();
+    const { matched } = matchPokemon(master, rankings, '2500', {}, {}, {});
+    const duration = performance.now() - start;
+    expect(duration).toBeLessThan(500);
+    expect(matched.length).toBe(rankings.length);
+  });
 });
+
